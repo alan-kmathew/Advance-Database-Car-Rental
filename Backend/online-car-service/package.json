@@ -1,0 +1,102 @@
+{
+  "name": "online-example-service",
+  "version": "1.0.0",
+  "description": "online-example-service",
+  "main": "server.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ACS-2023-25/advance-database-car-rental.git"
+  },
+  "scripts": {
+    "dev": "nodemon -r dotenv/config server.js dotenv_config_path=./config/development.env",
+    "start": "node server.js",
+    "test": "jest",
+    "lint": "eslint .",
+    "prettier:check": "prettier -c '**/*.js'",
+    "prettier:format": "prettier -w '**/*.{js,json}'"
+  },
+  "author": "",
+  "license": "",
+  "dependencies": {
+    "amqplib": "^0.10.0",
+    "axios": "^0.27.2",
+    "dotenv": "^16.0.1",
+    "express": "^4.18.1",
+    "express-validator": "^6.14.2",
+    "mariadb": "^3.0.0",
+    "mongodb": "^6.3.0",
+    "mongoose": "^8.0.2",
+    "mysql2": "^2.3.3",
+    "redis": "^4.2.0",
+    "sequelize": "^6.21.2",
+    "supertest": "^6.2.4",
+    "swagger-jsdoc": "^6.2.1",
+    "swagger-ui-express": "^4.4.0",
+    "winston": "^3.8.1",
+    "winston-daily-rotate-file": "^4.7.1"
+  },
+  "devDependencies": {
+    "@types/jest": "^28.1.4",
+    "eslint": "^8.19.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-import": "^2.26.0",
+    "eslint-plugin-prettier": "^4.2.1",
+    "jest": "^28.1.2",
+    "jest-junit": "^14.0.0",
+    "nodemon": "^2.0.19",
+    "prettier": "^2.7.1",
+    "supertest": "^6.2.4"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "globalSetup": "<rootDir>/tests/jest-setup.js",
+    "collectCoverage": true,
+    "coverageDirectory": "<rootDir>/tests/coverage/",
+    "coverageReporters": [
+      "text",
+      "cobertura"
+    ],
+    "reporters": [
+      "default",
+      "jest-junit"
+    ],
+    "testTimeout": 100000
+  },
+  "prettier": {
+    "singleQuote": true,
+    "jsxSingleQuote": true,
+    "tabWidth": 4,
+    "overrides": [
+      {
+        "files": [
+          "*.yaml",
+          "*.yml",
+          "*.json"
+        ],
+        "options": {
+          "tabWidth": 2
+        }
+      }
+    ],
+    "printWidth": 100,
+    "arrowParens": "avoid",
+    "endOfLine": "auto"
+  },
+  "eslintConfig": {
+    "env": {
+      "browser": false,
+      "commonjs": true,
+      "es2021": true,
+      "node": true,
+      "jest": true
+    },
+    "plugins": [
+      "prettier"
+    ],
+    "parserOptions": {
+      "ecmaVersion": "latest"
+    },
+    "rules": {}
+  }
+}
