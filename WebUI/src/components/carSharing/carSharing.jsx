@@ -1,7 +1,7 @@
 import React from 'react';
 
 const carSharing = () => {
-    return <div>CarSharing Content</div>;
+    return <div>Passenger</div>;
 };
 
 export default carSharing;
