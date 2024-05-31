@@ -7,6 +7,7 @@ import Usecase4 from '../components/usecase4/Usecase4.jsx';
 import Usecase5 from '../components/usecase5/Usecase5.jsx';
 import '../styles/Dashboard.css';
 
+
 function Dashboard() {
 
   return (
@@ -17,7 +18,7 @@ function Dashboard() {
           <Routes>
             <Route path="/" element={<Navigate to="/searchEngine" />} />
             <Route path="/searchEngine" element={<SearchEngine />} />
-            <Route path="/carSharing" element={<CarSharing />} />
+            <Route path="/passenger" element={<CarSharing />} />
             <Route path="/usecase3" element={<Usecase3 />} />
             <Route path="/usecase4" element={<Usecase4 />} />
             <Route path="/usecase5" element={<Usecase5 />} />

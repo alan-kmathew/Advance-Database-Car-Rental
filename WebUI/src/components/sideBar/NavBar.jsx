@@ -7,7 +7,7 @@ import '../../styles/Navbar.css';
 
 const originalMenuItems = [
   { title: 'Rent a Car', icon: carSearch, path: '/searchEngine' },
-  { title: 'Car Sharing', icon: carSharing, path: '/carSharing' },
+  { title: 'Passenger', icon: carSharing, path: '/passenger' },
 ];
 
 const newMenuItems = [
