@@ -9,6 +9,6 @@ router.get('/', (req, res) => {
     res.send(`Server is up and running at ${new Date()}`);
 });
 
-router.use('internal/example', require('./example.router'));
+router.use('api/car', require('./car.router'));
 
 module.exports = router;
