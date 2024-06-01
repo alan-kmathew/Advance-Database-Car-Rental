@@ -6,5 +6,10 @@ app.listen(process.env.PORT, () => {
     logger.info(`Server running in ${process.env.NODE_ENV} mode on port ${process.env.PORT}`);
 });
 
+process.on('SIGINT', async () => {
+    logger.info('closing Neo4j driver');
+    dbService.closeNeo4j();
+    process.exit(0);
+});
+
 dbService.connectMongoDB();
-dbService.connectNeo4j();
