@@ -1,7 +1,10 @@
 const mongoose = require('mongoose');
 const neo4j = require('neo4j-driver');
+const { createClient } = require('redis');
 const { logger } = require('../../util/logging');
+require('dotenv').config();  
 let neo4jDriver;
+let redisClient;
 
 const connectMongoDB = async () => {
     try {
@@ -38,10 +41,34 @@ const connectNeo4j = async () => {
     }
 };
 
+const connectRedis = async () => {
+    try {
+        redisClient = createClient({
+            password: process.env.REDIS_PASSWORD,
+            socket: {
+                host: process.env.REDIS_HOST,
+                port: process.env.REDIS_PORT,
+            }
+        });
+        redisClient.on('error', (err) => logger.error('Redis Client Error', err));
+        await redisClient.connect();
+        logger.info('Connected to Redis');
+    } catch (error) {
+        logger.error('Error connecting to Redis:', error);
+        process.exit(1);
+    }
+};
+
 const closeNeo4j = async () => {
     if (neo4jDriver) {
         await neo4jDriver.close();
     }
 };
 
-module.exports = { connectMongoDB, connectNeo4j, closeNeo4j };
+const closeRedis = async () => {
+    if (redisClient) {
+        await redisClient.disconnect();
+    }
+};
+
+module.exports = { connectMongoDB, connectNeo4j, connectRedis, closeNeo4j, closeRedis };
