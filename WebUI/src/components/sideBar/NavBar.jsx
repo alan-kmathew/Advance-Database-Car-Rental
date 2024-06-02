@@ -11,8 +11,8 @@ const originalMenuItems = [
 ];
 
 const newMenuItems = [
-  { title: 'Use Case 3', icon: carSearch, path: '/usecase3' },
-  { title: 'Use Case 4', icon: carSharing, path: '/usecase4' },
+  { title: 'Book an Event', icon: carSearch, path: '/eventBooking' },
+  { title: 'Fleet Optimisation', icon: carSharing, path: '/fleetOpt' },
   { title: 'Use Case 5', icon: carSearch, path: '/usecase5' },
 ];
 
