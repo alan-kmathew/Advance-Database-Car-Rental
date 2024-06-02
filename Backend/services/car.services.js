@@ -1,5 +1,4 @@
-// const NumbersModel = require('../db/model/schema');
-// const { MongoClient, ObjectId } = require('mongodb');
+const { ServicePoint, Car } = require('../db/model/schema');
 const { logger } = require('../util/logging');
 
 const executeShortestPathQuery = async (session, fromLocation, toLocation) => {
@@ -95,4 +94,19 @@ const executeNearestServiceStationQuery = async (session, cityName) => {
     }
 };
 
-module.exports = { executeShortestPathQuery, executeNearestServiceStationQuery };
+const getCarsByServiceStation = async servicePointName => {
+    try {
+        const servicePoint = await ServicePoint.findOne({ name: servicePointName })
+            .populate('cars')
+            .exec();
+        return servicePoint?.cars;
+    } catch (error) {
+        logger.error('Error fetching cars by service station name:', error);
+    }
+};
+
+module.exports = {
+    executeShortestPathQuery,
+    executeNearestServiceStationQuery,
+    getCarsByServiceStation,
+};
