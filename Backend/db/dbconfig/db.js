@@ -59,6 +59,7 @@ const connectRedis = async () => {
         logger.error('Error connecting to Redis:', error);
         process.exit(1);
     }
+    return redisClient;
 };
 
 const closeNeo4j = async () => {
