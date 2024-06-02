@@ -21,15 +21,6 @@ const carSchema = new mongoose.Schema({
     seats: { type: Number, required: true },
 });
 
-const ServicePoint = mongoose.model('ServicePoint', servicePointSchema);
-
-const Car = mongoose.model('Car', carSchema);
-
-module.exports = {
-    ServicePoint,
-    Car,
-};
-
 const BookingsSchema = new mongoose.Schema({
     carId: { type: mongoose.Schema.Types.ObjectId, required: true },
     startDate: { type: Date, required: true },
@@ -39,10 +30,20 @@ const BookingsSchema = new mongoose.Schema({
         email: { type: String, required: true },
     },
     price: { type: Number, required: true },
-    servicePointId: { type: mongoose.Schema.Types.ObjectId, required: true },
+    servicePointId: { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'ServicePoint' },
     type: { type: String, required: true },
+    bookingDate: { type: Date, required: true },
+    destination: { type: String, required: false },
 });
- 
+
+const ServicePoint = mongoose.model('ServicePoint', servicePointSchema);
+
+const Car = mongoose.model('Car', carSchema);
+
 const BookingsModel = mongoose.model('Bookings', BookingsSchema);
 
-module.exports = BookingsModel;
+module.exports = {
+    ServicePoint,
+    Car,
+    BookingsModel,
+};
