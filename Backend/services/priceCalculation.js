@@ -12,7 +12,7 @@ const calculatePrice = async (redisClient, carIds, fromLocation, startDate, endD
         }
 
         const durationday = (new Date(endDate) - new Date(startDate)) / (1000 * 60 * 60 * 24);
-        console.log(durationday);
+        //console.log(durationday);
 
         // Calculate price from TomTom API
         const calculatePriceFromTomTom = async (fromLocation) => {
@@ -22,7 +22,7 @@ const calculatePrice = async (redisClient, carIds, fromLocation, startDate, endD
             
             const response = await axios.get(trafficUrl);
             const trafficData = response.data.flowSegmentData;
-            console.log(trafficData.currentSpeed);
+            //console.log(trafficData.currentSpeed);
 
             return {
                 currentSpeed: trafficData.currentSpeed,
