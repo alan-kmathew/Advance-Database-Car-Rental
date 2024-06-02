@@ -29,3 +29,20 @@ module.exports = {
     ServicePoint,
     Car,
 };
+
+const BookingsSchema = new mongoose.Schema({
+    carId: { type: mongoose.Schema.Types.ObjectId, required: true },
+    startDate: { type: Date, required: true },
+    endDate: { type: Date, required: true },
+    customer: {
+        name: { type: String, required: true },
+        email: { type: String, required: true },
+    },
+    price: { type: Number, required: true },
+    servicePointId: { type: mongoose.Schema.Types.ObjectId, required: true },
+    type: { type: String, required: true },
+});
+ 
+const BookingsModel = mongoose.model('Bookings', BookingsSchema);
+
+module.exports = BookingsModel;

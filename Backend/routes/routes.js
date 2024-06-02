@@ -1,6 +1,7 @@
 const express = require('express');
 
 const { logger } = require('../util/logging');
+const { route } = require('../app');
 
 const router = express.Router();
 
