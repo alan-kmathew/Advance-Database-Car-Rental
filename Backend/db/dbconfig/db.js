@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const neo4j = require('neo4j-driver');
 const { createClient } = require('redis');
 const { logger } = require('../../util/logging');
-require('dotenv').config();  
+require('dotenv').config();
 let neo4jDriver;
 let redisClient;
 
@@ -17,6 +17,8 @@ const connectMongoDB = async () => {
                 process.env.MONGODB_CLUSTER_URI,
             {
                 dbName: process.env.MONGODB_DATABASE,
+                useNewUrlParser: true,
+                useUnifiedTopology: true,
             }
         );
         logger.info('Connected to MongoDB');
@@ -48,9 +50,9 @@ const connectRedis = async () => {
             socket: {
                 host: process.env.REDIS_HOST,
                 port: process.env.REDIS_PORT,
-            }
+            },
         });
-        redisClient.on('error', (err) => logger.error('Redis Client Error', err));
+        redisClient.on('error', err => logger.error('Redis Client Error', err));
         await redisClient.connect();
         logger.info('Connected to Redis');
     } catch (error) {
