@@ -105,13 +105,16 @@ router.get('/get/cars', async (req, res) => {
                 path: `${req.baseUrl}${req.path}`,
             });
         }
-        const carsResult = await getCarsByServiceStation(req.query.servicePointName);
+        const carsResult = await getCarsByServiceStation(
+            req.query.servicePointName,
+            req.query.carCategory
+        );
         if (!carsResult || carsResult.length === 0) {
             return res.status(404).json({
                 timestamp: new Date(),
                 status: 404,
                 error: 'Not Found',
-                message: `No cars found at the ${req.query.servicePointName} service station`,
+                message: `No  ${req.query.carCategory} cars found at the ${req.query.servicePointName} service station`,
                 path: `${req.baseUrl}${req.path}`,
             });
         }

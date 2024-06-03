@@ -110,10 +110,15 @@ const getCoordinates = async (session, stationName) => {
     }
 };
 
-const getCarsByServiceStation = async servicePointName => {
+const getCarsByServiceStation = async (servicePointName, carCategory) => {
     try {
-        const servicePoint = await ServicePoint.findOne({ name: servicePointName })
-            .populate('cars')
+        const servicePoint = await ServicePoint.findOne({
+            name: new RegExp(`^${servicePointName}$`, 'i'),
+        })
+            .populate({
+                path: 'cars',
+                match: { category: new RegExp(`^${carCategory}$`, 'i') },
+            })
             .exec();
         return servicePoint?.cars;
     } catch (error) {
