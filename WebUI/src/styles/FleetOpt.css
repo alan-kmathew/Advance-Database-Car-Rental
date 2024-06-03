@@ -1,4 +1,31 @@
-.leaflet-container {
+/* .leaflet-container {
     height: 100vh;
     width: 100%;
+}
+
+.fleet-opt-container {
+    position: relative;
+   
+  }
+  
+  .overlay-form {
+    position: absolute;
+    top: 20px; 
+    left: 20px; 
+    background-color: #fff;
+    border: 1px solid #ccc;
+    padding: 20px;
+    z-index: 10; 
+  }
+  
+
+
+
+    */
+
+    /* FleetOpt.css */
+.fleet-opt-container {
+  position: relative;
+  width: 100%;
+  height: 100vh;
 }
