@@ -216,6 +216,14 @@ const getServiceStationWithMostBookings = async (
                 );
                 result.latitude = serviceStationCoordinates.Latitude;
                 result.longitude = serviceStationCoordinates.Longitude;
+                const nearestServiceStations = await executeNearestServiceStationQuery(
+                    session,
+                    result.servicePointName
+                );
+
+                result.nearestServiceStations = nearestServiceStations.filter(
+                    station => station.locatedInCity !== `${result.servicePointName}`
+                );
             }
             await redisClient.set(cacheKey, JSON.stringify(mostBookingsResult), {
                 EX: 3600,
