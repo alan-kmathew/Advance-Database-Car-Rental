@@ -1,15 +1,16 @@
 import React from 'react'
+import EventBooking from "../eventBooking/EventBooking"
+import FleetOptForm from './FleetForm';
 import "../../styles/FleetOpt.css"
-import EventBooking from '../eventBooking/EventBooking'
 
 
 function FleetOpt() {
   return (
-
-      <EventBooking/>
-
-
-  )
+    <div className="fleet-opt-container">
+      <FleetOptForm /> {/* Add the form component here */}
+      <EventBooking showForm={false} />
+    </div>
+  );
 }
 
-export default FleetOpt
+export default FleetOpt;

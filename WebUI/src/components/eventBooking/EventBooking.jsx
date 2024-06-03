@@ -5,7 +5,7 @@ import "leaflet/dist/leaflet.css";
 import { Icon } from "leaflet";
 import EventBookingForm from "../eventBooking/EventBookingForm"; 
 
-function EventBooking() {
+function EventBooking({ showForm = true }) {
   // Markers for the Location
   const markers = [
     { position: [49.4875, 8.466], popup: "Mannheim, Germany - Central Point" },
@@ -38,9 +38,11 @@ function EventBooking() {
           <Popup>{marker.popup}</Popup>
         </Marker>
       ))}
-      <div className="form-overlay">
-        <EventBookingForm />
-      </div>
+      {showForm && (
+        <div className="form-overlay">
+          <EventBookingForm />
+        </div>
+      )}
     </MapContainer>
   );
 }
