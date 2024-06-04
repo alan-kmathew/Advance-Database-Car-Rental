@@ -1,4 +1,4 @@
-const { logger } = require('../util/logging');
+const { logger } = require('./logging');
 const axios = require('axios');
 
 const calculatePrice = async (redisClient, carIds, fromLocation, startDate, endDate) => {

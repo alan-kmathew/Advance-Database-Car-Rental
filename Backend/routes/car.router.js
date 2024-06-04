@@ -2,8 +2,11 @@ const { Router } = require('express');
 const { validationResult } = require('express-validator');
 const { logger } = require('../util/logging');
 const { findCarForRental } = require('../services/carRental.service');
-const { idToLocation } = require('../services/IdToLocation');
-const calculatePrice = require('../services/priceCalculation');
+const { idToLocation } = require('../util/IdToLocation');
+const { servicePointList } = require('../util/servicePointList');
+const { createBooking } = require('../services/booking.service');
+const calculatePrice = require('../util/priceCalculation');
+const { mapLocationList } = require('../util/mapLocationList');
 const {
     executeShortestPathQuery,
     executeNearestServiceStationQuery,
@@ -229,4 +232,75 @@ router.get('/get/carRental', async (req, res) => {
     }
 });
 
+router.get('/get/servicePoints', async (req, res) => {
+    logger.info(`Entering ${req.baseUrl}${req.path}`);
+    try {
+        const servicePoints = await servicePointList();
+        return res.status(200).json(servicePoints);
+    } catch (err) {
+        logger.error(err);
+        return res.status(500).json({
+            timestamp: new Date(),
+            status: 500,
+            error: 'Internal Server Error',
+            message: err.message,
+            path: `${req.baseUrl}${req.path}`,
+        });
+    }
+}
+);
+
+router.post('/create/booking', async (req, res) => {
+    logger.info(`Entering ${req.baseUrl}${req.path}`);
+    try {
+        const validationErrors = validationResult(req);
+
+        if (!validationErrors.isEmpty()) {
+            const erroMessage = validationErrors.array();
+            return res.status(400).json({
+                timestamp: new Date(),
+                status: 400,
+                error: 'Bad Request',
+                message: erroMessage,
+                path: `${req.baseUrl}${req.path}`,
+            });
+        }
+   
+        const newBooking = await createBooking(req.body);
+
+        if (newBooking) {
+            return res.status(200).json({ message: 'Booking created successfully' });
+        } else {
+            return res.status(404).json({ message: 'Booking not created' });
+        }
+
+    } catch (err) {
+        logger.error(err);
+        return res.status(500).json({
+            timestamp: new Date(),
+            status: 500,
+            error: 'Internal Server Error',
+            message: err.message,
+            path: `${req.baseUrl}${req.path}`,
+        });
+    }
+});
+
+router.get('/get/allLocationsInMap', async (req, res) => {
+
+    try {
+        const mapLocations = await mapLocationList();
+        return res.status(200).json(mapLocations);
+    } catch (err) {
+        logger.error(err);
+        return res.status(500).json({
+            timestamp: new Date(),
+            status: 500,
+            error: 'Internal Server Error',
+            message: err.message,
+            path: `${req.baseUrl}${req.path}`,
+        });
+    }
+}
+);
 module.exports = router;
