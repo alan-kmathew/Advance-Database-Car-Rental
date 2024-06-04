@@ -1,5 +1,7 @@
 const { ServicePoint, Car, BookingsModel } = require('../db/model/schema');
 const { logger } = require('../util/logging');
+const mongoose = require('mongoose');
+const moment = require('moment');
 
 const executeShortestPathQuery = async (session, fromLocation, toLocation) => {
     try {
@@ -239,9 +241,83 @@ const getServiceStationWithMostBookings = async (
     }
 };
 
+const getRideSharingCarDetails = async (source_location, destination_location, travel_date, nearyByServiceStations) => {
+    console.log("inside getRideSharingCarDetails")
+    if (!source_location || !destination_location || !travel_date) {
+        return res.status(400).json({ error: 'All fields are required' });
+    }
+    //const travelDate = new Date(travel_date);
+    const travelDate = moment(travel_date); // Assuming travel_date is a string
+   console.log("travelDate--------->",travelDate);
+    const serviceStationIds = nearyByServiceStations.map(station => new mongoose.Types.ObjectId(station.serviceStationID));
+    try {
+        const availableCars = await BookingsModel.aggregate([
+            {
+              $match: {
+                servicePointId: { $in: serviceStationIds },
+                 $or: [{ type: 'sharing' }, { type: 'passenger' }] 
+              }
+            },
+            {
+              $lookup: {
+                from: 'cars',
+                localField: 'carId',
+                foreignField: '_id',
+                as: 'carDetails'
+              }
+            },
+            {
+              $unwind: '$carDetails'
+            },
+            {
+              $match: {
+                'carDetails.seats': { $gt: 0 }
+              }
+            },
+            {
+              $project: {
+                _id: 1,
+                startDate: 1,
+                endDate: 1,
+                customer: 1,
+                price: 1,
+                servicePointId: 1,
+                type: 1,
+                bookingDate: 1,
+                destination: 1,
+                'carDetails.model': 1,
+                'carDetails.type': 1,
+                'carDetails.category': 1,
+                'carDetails.basePrice': 1,
+                'carDetails.color': 1,
+                'carDetails.plateNo': 1,
+                'carDetails.image': 1,
+                'carDetails.seats': 1
+              }
+            }
+          ]).exec();
+          console.log("availableCars----------->",availableCars);
+          console.log("availableCars before filtering----------->", availableCars);
+
+          // Filter available cars based on travel date
+          const filteredCars = availableCars.filter(car => {
+              const startDate = moment(car.startDate);
+              const endDate = moment(car.endDate);
+              return travelDate.isBetween(startDate, endDate, null, '[]'); // Check if travelDate is between startDate and endDate inclusive
+          });
+  
+          console.log("availableCars after filtering----------->", filteredCars);
+        //   res.json({ availableCars });
+    } catch (error) {
+        console.error(error);
+        logger.error('Error fetching ride sharing car details:', error);
+    }
+}
+
 module.exports = {
     executeShortestPathQuery,
     executeNearestServiceStationQuery,
     getCarsByServiceStation,
     getServiceStationWithMostBookings,
+    getRideSharingCarDetails
 };

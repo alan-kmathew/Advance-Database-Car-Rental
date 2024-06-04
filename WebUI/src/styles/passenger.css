@@ -1,0 +1,72 @@
+/* passenger.css */
+.passenger-container {
+    position: relative;
+  }
+  
+  .passenger-form {
+    position: absolute;
+    top: 20px;
+    left: 50px; /* Changed from right to left */
+    max-width: 250px; /* Increased max-width */
+    padding: 20px;
+    background: white;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    width: 100%;
+  }
+  
+  .form-group {
+    margin-bottom: 15px;
+  }
+  
+  .form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    font-size: 14px;
+  }
+  
+  .form-group input {
+    width: 100%;
+    padding: 10px; /* Increased padding */
+    box-sizing: border-box;
+    border: 1px solid #ccc; /* Added border */
+    border-radius: 5px; /* Added border-radius */
+    font-size: 14px; /* Increased font size */
+    transition: border-color 0.3s;
+  }
+  
+  .form-group input:focus {
+    border-color: #007bff; /* Change border color on focus */
+    outline: none;
+  }
+  
+  .error {
+    color: red;
+    font-size: 12px;
+    margin-top: 5px;
+  }
+  
+  .btn {
+    display: inline-block;
+    padding: 10px 15px;
+    font-size: 16px;
+    border-radius: 5px;
+    color: #fff;
+    background-color: #007bff;
+    border: none;
+    cursor: pointer;
+    text-align: center;
+    transition: background-color 0.3s;
+  }
+  
+  .btn-primary {
+    background-color: #007bff;
+  }
+  
+  .btn-primary:hover {
+    background-color: #0056b3;
+  }
+  
