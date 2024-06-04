@@ -17,8 +17,6 @@ const connectMongoDB = async () => {
                 process.env.MONGODB_CLUSTER_URI,
             {
                 dbName: process.env.MONGODB_DATABASE,
-                useNewUrlParser: true,
-                useUnifiedTopology: true,
             }
         );
         logger.info('Connected to MongoDB');
