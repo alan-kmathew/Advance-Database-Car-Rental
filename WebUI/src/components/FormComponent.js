@@ -21,6 +21,8 @@ const FormComponent = ({ locations, onLocationChange, enableSharing }) => {
 
   return (
     <form onSubmit={handleSubmit} className="form-container">
+ 
+    {!enableSharing && ( 
       <div>
         <label>From Date:</label>
         <input
@@ -30,6 +32,8 @@ const FormComponent = ({ locations, onLocationChange, enableSharing }) => {
           required
         />
       </div>
+    )}
+    {!enableSharing && ( 
       <div>
         <label>To Date:</label>
         <input
@@ -39,6 +43,7 @@ const FormComponent = ({ locations, onLocationChange, enableSharing }) => {
           required
         />
       </div>
+    )}
       <div>
         <label>Location:</label>
         <select

@@ -22,22 +22,54 @@
     top: 20px;
     left: 50px;
     background: white;
-    padding: 40px;
+    padding: 20px;
     border-radius: 10px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     z-index: 1000; /* Ensure the form is above the map */
+    max-width: 350px;
+    width: 100%;
   }
   
   .form-container label {
     display: block;
     margin-bottom: 5px;
+    font-weight: bold; /* Added font-weight */
+    font-size: 14px; /* Adjusted font size */
   }
   
   .form-container input,
   .form-container select {
     margin-bottom: 10px;
-    padding: 5px;
+    padding: 10px; /* Increased padding */
     width: 100%;
+    box-sizing: border-box;
+    border: 1px solid #ccc; /* Added border */
+    border-radius: 5px; /* Added border-radius */
+    font-size: 14px; /* Increased font size */
+    transition: border-color 0.3s; /* Added transition */
+  }
+  
+  .form-container input:focus,
+  .form-container select:focus {
+    border-color: #007bff; /* Change border color on focus */
+    outline: none;
+  }
+  
+  .form-container button {
+    display: inline-block;
+    padding: 10px 15px; /* Increased padding */
+    font-size: 16px; /* Adjusted font size */
+    border-radius: 5px;
+    color: #fff;
+    background-color: #007bff; /* Blue background */
+    border: none;
+    cursor: pointer;
+    text-align: center;
+    transition: background-color 0.3s; /* Added transition */
+  }
+  
+  .form-container button:hover {
+    background-color: #0056b3; /* Darker blue on hover */
   }
   
   /* Smaller toggle switch CSS */
@@ -90,5 +122,4 @@
     font-size: 15px;
     margin-left: 10px;
   }
-  
   

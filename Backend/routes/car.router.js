@@ -12,6 +12,7 @@ const {
     executeNearestServiceStationQuery,
     getCarsByServiceStation,
     getServiceStationWithMostBookings,
+    getRideSharingCarDetails
 } = require('../services/car.services');
 const dbService = require('../db/dbconfig/db');
 
@@ -232,6 +233,44 @@ router.get('/get/carRental', async (req, res) => {
     }
 });
 
+router.post('/get/riderdetails', async(req, res) => {
+    logger.info(`Entering ${req.baseUrl}${req.path}`);
+    try {
+        const validationErrors = validationResult(req);
+
+        if (!validationErrors.isEmpty()) {
+            const erroMessage = validationErrors.array();
+            return res.status(400).json({
+                timestamp: new Date(),
+                status: 400,
+                error: 'Bad Request',
+                message: erroMessage,
+                path: `${req.baseUrl}${req.path}`,
+            });
+        }
+        const neo4jSession = await dbService.connectNeo4j();
+        const nearestServiceStationResult = await executeNearestServiceStationQuery(
+            neo4jSession,
+            req.body.source_location
+        );
+        console.log(nearestServiceStationResult);
+        const matchedRideSharingCarDetails = await getRideSharingCarDetails(
+            req.body.source_location,
+            req.body.destination_location,
+            req.body.travel_date,
+            nearestServiceStationResult,
+        );
+    } catch (err) {
+        logger.error(err);
+        return res.status(500).json({
+            timestamp: new Date(),
+            status: 500,
+            error: 'Internal Server Error',
+            message: err.message,
+            path: `${req.baseUrl}${req.path}`,
+        });
+    }
+})
 router.get('/get/servicePoints', async (req, res) => {
     logger.info(`Entering ${req.baseUrl}${req.path}`);
     try {
