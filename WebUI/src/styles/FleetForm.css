@@ -1,4 +1,4 @@
-.fleet-opt-form {
+ .fleet-opt-form {
     position: absolute;
     top: 40px;
     left: 60px;
@@ -101,4 +101,6 @@
       width: calc(100% - 20px);
       max-width: 300px;
     }
-  }
+  } 
+
+  
