@@ -1,14 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { useMap, Polyline, Marker, Popup } from 'react-leaflet';
 import L from "leaflet";
-import CustomDropdown from './CustomDropdownEvent'; // Import the new component
+import CustomDropdown from './CustomDropdownEvent'; 
 import "../../styles/EventbookingForm.css";
 
 const NewIcon = L.icon({
-  iconUrl: require("../../Assets/loc-icon.png"),
-  iconSize: [38, 38],
+  iconUrl: require("../../Assets/dest.png"),
+  iconSize: [40, 40],
 });
 
+const IconDest = L.icon({
+  iconUrl: require("../../Assets/Service.png"),
+  iconSize: [38, 38],
+})
 const EventBookingForm = () => {
   const [fromDate, setFromDate] = useState('');
   const [toDate, setToDate] = useState('');
@@ -182,6 +186,13 @@ const EventBookingForm = () => {
       </div>
       {selectedServicePoint && destinationCoordinates.length > 0 && (
         <>
+       {selectedServicePoint && (
+  <Marker position={getCoordinatesOfServicePoint(selectedServicePoint)} icon={IconDest}>
+    <Popup>
+      {selectedServicePoint}
+    </Popup>
+  </Marker>
+)}
           {destinations.map((destination, index) => (
             <Marker key={index} position={getCoordinatesOfServicePoint(destination)} icon={NewIcon}>
               <Popup>
@@ -199,3 +210,6 @@ const EventBookingForm = () => {
 };
 
 export default EventBookingForm;
+
+
+

@@ -7,7 +7,7 @@ import "../../styles/FleetOpt.css"
 function FleetOpt() {
   return (
     <div className="fleet-opt-container">
-      <FleetOptForm /> {/* Add the form component here */}
+      <FleetOptForm /> 
       <EventBooking showForm={false} />
     </div>
   );
