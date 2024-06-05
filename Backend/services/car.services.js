@@ -224,7 +224,7 @@ const getCarsByServiceStation = async (servicePointName, carCategory) => {
         })
             .populate({
                 path: 'cars',
-                match: { category: new RegExp(`^${carCategory}$`, 'i') },
+                match: { type: new RegExp(`^${carCategory}$`, 'i') },
             })
             .exec();
         return servicePoint?.cars;
