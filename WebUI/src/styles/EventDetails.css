@@ -1,0 +1,21 @@
+.event-details-container {
+    border-radius: 5px;
+    padding: 20px;
+    margin-top: 10px;
+  }
+  
+  .event-details-title {
+    color: #333;
+    font-size: 20px;
+    margin-bottom: 10px;
+  }
+  
+  .event-details-content {
+    color: #555;
+    font-size: 16px;
+  }
+  
+  .event-details-content p {
+    margin: 5px 0;
+  }
+  
