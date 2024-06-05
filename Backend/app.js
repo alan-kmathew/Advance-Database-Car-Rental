@@ -3,7 +3,6 @@ const cors = require('cors');
 const https = require('https');
 const path = require('path');
 const fs = require('fs');
-const cors = require('cors');
 const routes = require('./routes/routes');
 const carRoutes = require('./routes/car.router');
 
