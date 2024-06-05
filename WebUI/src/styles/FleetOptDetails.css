@@ -1,0 +1,17 @@
+.fleet-opt-details {
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    padding: 10px;
+    border-radius: 5px;
+  }
+  
+  .fleet-opt-details strong {
+    font-size: 16px;
+    color: #333;
+  }
+  
+  .fleet-opt-details p {
+    margin: 5px 0 0;
+    color: #555;
+  }
+  
