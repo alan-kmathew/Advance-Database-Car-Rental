@@ -574,6 +574,8 @@ const EventBookingForm = () => {
           carCategory: selectedCarType,
         },
       });
+
+      
       const available = response.data.totalCarsAvailable;
       setAvailableCars(available);
 
@@ -593,17 +595,32 @@ const EventBookingForm = () => {
   const handleScanAgain = async () => {
     try {
       const response = await axios.get(`http://localhost:8020/api/car/get/nearest/servicestation?cityName=${selectedServicePoint}`);
-      const nearestServiceStationCoordinates = response.data?.coordinates?.split(',').map(coord => parseFloat(coord.trim()));
-      if (nearestServiceStationCoordinates && nearestServiceStationCoordinates.length === 2) {
-        map.setView(nearestServiceStationCoordinates, 12);
+      
+      if (Array.isArray(response.data) && response.data.length > 0) {
+        const nearestServiceStation = response.data[0]; // Assuming the first station is the nearest
+        const { latitude, longitude } = nearestServiceStation;
+    
+        if (latitude !== undefined && longitude !== undefined) {
+          const coordinatesArray = [parseFloat(latitude), parseFloat(longitude)];
+          map.setView(coordinatesArray, 12);
+  
+          // Add marker for the nearest service station
+          const nearestServiceStationMarker = L.marker(coordinatesArray, { icon: IconDest }).addTo(map);
+          nearestServiceStationMarker.bindPopup(`<b>Nearest Service Station</b><br>${selectedServicePoint}`).openPopup();
+        } else {
+          console.error('Invalid coordinates received:', nearestServiceStation);
+        }
       } else {
-        console.error('Invalid coordinates received:', nearestServiceStationCoordinates);
+        console.error('No valid service station found in the response');
       }
     } catch (error) {
       console.error('Error fetching nearest service station:', error);
     }
   };
   
+  
+  
+
 
   const handleServicePointSelection = (point) => {
     setSelectedServicePoint(point);
@@ -717,3 +734,7 @@ const EventBookingForm = () => {
 };
 
 export default EventBookingForm;
+
+
+
+
