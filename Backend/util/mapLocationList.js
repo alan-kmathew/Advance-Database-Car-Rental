@@ -27,8 +27,9 @@ const mapLocationList = async () => {
         });
 
         await session.close();
-
-        await redisClient.set(cacheKey, JSON.stringify(locations), 'EX', 3600); // time 1 hour
+        await redisClient.set(cacheKey, JSON.stringify(locations), {
+            EX: 3600,
+        });
         logger.info('Storing location data in Redis cache');
 
         await redisClient.disconnect();
