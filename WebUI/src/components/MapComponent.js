@@ -1,12 +1,8 @@
-// MapComponent.jsx
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
-import carImage from '../Assets/bmw.jpeg';
-import carIcon from '../Assets/car-icon.jpeg';
 import '../styles/MapComponent.css';
-import CustomDropdown from '../components/CustomDropdown';
 
 // Fix the default icon issue in Leaflet
 delete L.Icon.Default.prototype._getIconUrl;
@@ -16,68 +12,8 @@ L.Icon.Default.mergeOptions({
   shadowUrl: require('leaflet/dist/images/marker-shadow.png'),
 });
 
-const cities = [
-  {
-    name: 'Berlin',
-    coordinates: [52.52, 13.4050],
-    availableCars: 20,
-    availableServiceWorkers: 5,
-    price: '30$',
-    cars: [
-      { name: 'BMW X1', seats: 4, image: carImage },
-      { name: 'Audi A4', seats: 5, image: carImage },
-      { name: 'Audi A4', seats: 5, image: carImage },
-    ],
-  },
-  {
-    name: 'Nuremberg',
-    coordinates: [49.4521, 11.0767],
-    availableCars: 15,
-    availableServiceWorkers: 7,
-    price: '40$',
-    cars: [
-      { name: 'BMW X1', seats: 4, image: carImage },
-      { name: 'Audi A4', seats: 5, image: carImage },
-    ],
-  },
-  {
-    name: 'Hamburg',
-    coordinates: [53.5511, 9.9937],
-    availableCars: 25,
-    availableServiceWorkers: 5,
-    price: '50$',
-    cars: [
-      { name: 'BMW X1', seats: 4, image: carImage },
-      { name: 'Audi A4', seats: 5, image: carImage },
-    ],
-  },
-  {
-    name: 'Heidelberg',
-    coordinates: [49.3988, 8.6724],
-    availableCars: 10,
-    availableServiceWorkers: 15,
-    price: '25$',
-    cars: [
-      { name: 'BMW X1', seats: 4, image: carImage },
-      { name: 'Audi A4', seats: 5, image: carImage },
-    ],
-  },
-  {
-    name: 'Mannheim',
-    coordinates: [49.4875, 8.4660],
-    availableCars: 18,
-    availableServiceWorkers: 10,
-    price: '35$',
-    cars: [
-      { name: 'BMW X1', seats: 4, image: carImage },
-      { name: 'Audi A4', seats: 5, image: carImage },
-    ],
-  },
-];
-
-const MapComponent = ({ selectedLocation }) => {
+const MapComponent = ({ locations, selectedLocation, onLocationChange, fromDate, toDate, destination, enableSharing, onSearch }) => {
   const map = useMap();
-  const [selectedCar, setSelectedCar] = useState(null);
 
   useEffect(() => {
     if (selectedLocation) {
@@ -85,8 +21,16 @@ const MapComponent = ({ selectedLocation }) => {
     }
   }, [selectedLocation, map]);
 
-  const handleCarSelection = (car) => {
-    setSelectedCar(car);
+  const handleMarkerClick = (location) => {
+    onLocationChange(location);
+  };
+
+  const handleBookNowClick = () => {
+    if (!fromDate || !toDate || (enableSharing && !destination)) {
+      alert('Please fill all required fields.');
+      return;
+    }
+    onSearch();
   };
 
   return (
@@ -95,15 +39,20 @@ const MapComponent = ({ selectedLocation }) => {
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
       />
-      {cities.map(city => (
-        <Marker key={city.name} position={city.coordinates}>
+      {locations.map(location => (
+        <Marker 
+          key={location.id} 
+          position={location.coordinates}
+          eventHandlers={{
+            click: () => handleMarkerClick(location)
+          }}
+        >
           <Popup>
             <div className='popup'>
-              <h1 className='header'>{city.name}</h1>
-              <p className='no-cars'>Total Available cars: {city.availableCars}</p>
-              <p>Available service workers: {city.availableServiceWorkers}</p>
-              <CustomDropdown options={city.cars} onSelect={handleCarSelection} />
-              <button className="btn btn-success">Book now</button>
+              <h1 className='header'>{location.name}</h1>
+              <img src={location.image} alt={location.name} />
+              <p>Total Cars: {location.totalCars}</p>
+              <button className="btn-success" onClick={handleBookNowClick}>Book now</button>
             </div>
           </Popup>
         </Marker>
@@ -112,10 +61,19 @@ const MapComponent = ({ selectedLocation }) => {
   );
 };
 
-const MapWrapper = ({ selectedLocation }) => {
+const MapWrapper = ({ locations, selectedLocation, onLocationChange, fromDate, toDate, destination, enableSharing, onSearch }) => {
   return (
     <MapContainer center={[51.1657, 10.4515]} zoom={6} style={{ height: "100vh", width: "100%" }}>
-      <MapComponent selectedLocation={selectedLocation} />
+      <MapComponent 
+        locations={locations} 
+        selectedLocation={selectedLocation} 
+        onLocationChange={onLocationChange} 
+        fromDate={fromDate} 
+        toDate={toDate} 
+        destination={destination} 
+        enableSharing={enableSharing} 
+        onSearch={onSearch} 
+      />
     </MapContainer>
   );
 };

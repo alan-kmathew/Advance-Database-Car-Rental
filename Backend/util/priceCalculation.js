@@ -88,7 +88,9 @@ const calculatePrice = async (redisClient, carIds, fromLocation, startDate, endD
         });
 
         // Store in Redis cache
-        await redisClient.set(cacheKey, JSON.stringify(prices));
+        await redisClient.set(cacheKey, JSON.stringify(prices), {
+            EX: 3600,
+        });
         logger.info('Storing data in Redis cache');
 
         return prices;
