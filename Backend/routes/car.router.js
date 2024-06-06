@@ -236,6 +236,11 @@ router.get('/get/station/highbookings', async (req, res) => {
     }
 });
 
+
+/** 
+ * Get the car rental details
+ */
+
 router.get('/get/carRental', async (req, res) => {
     logger.info(`Entering ${req.baseUrl}${req.path}`);
     try {
@@ -322,7 +327,9 @@ router.post('/get/riderdetails', async (req, res) => {
     }
 });
 
-// Get all service points
+/** 
+ * Get all service points
+ */
 
 router.get('/get/servicePoints', async (req, res) => {
     logger.info(`Entering ${req.baseUrl}${req.path}`);
@@ -341,7 +348,9 @@ router.get('/get/servicePoints', async (req, res) => {
     }
 });
 
-// Create a booking
+/** 
+ * Create a new booking
+ */
 
 router.post('/create/booking', async (req, res) => {
     logger.info(`Entering ${req.baseUrl}${req.path}`);
@@ -378,7 +387,9 @@ router.post('/create/booking', async (req, res) => {
     }
 });
 
-// Get all locations in the map
+/** 
+ * Create a new booking
+ */
 
 router.get('/get/allLocationsInMap', async (req, res) => {
     try {
