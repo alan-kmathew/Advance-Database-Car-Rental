@@ -17,7 +17,10 @@ function FleetOpt() {
   return (
     <div className="fleet-opt-container">
       <FleetOptForm setServiceStations={setServiceStations} />
-      <MapContainer center={[49.4875, 8.466]} zoom={7} style={{ height: "100vh", width: "100%" }}>
+      <MapContainer  center={[49.4875, 8.466]}
+      zoom={6}
+      scrollWheelZoom={false}
+      style={{ height: "100%", position: "relative" }}>
         <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -38,3 +41,5 @@ function FleetOpt() {
 }
 
 export default FleetOpt;
+
+
