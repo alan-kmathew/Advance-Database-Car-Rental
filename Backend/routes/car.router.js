@@ -321,6 +321,9 @@ router.post('/get/riderdetails', async (req, res) => {
         });
     }
 });
+
+// Get all service points
+
 router.get('/get/servicePoints', async (req, res) => {
     logger.info(`Entering ${req.baseUrl}${req.path}`);
     try {
@@ -337,6 +340,8 @@ router.get('/get/servicePoints', async (req, res) => {
         });
     }
 });
+
+// Create a booking
 
 router.post('/create/booking', async (req, res) => {
     logger.info(`Entering ${req.baseUrl}${req.path}`);
@@ -372,6 +377,8 @@ router.post('/create/booking', async (req, res) => {
         });
     }
 });
+
+// Get all locations in the map
 
 router.get('/get/allLocationsInMap', async (req, res) => {
     try {
