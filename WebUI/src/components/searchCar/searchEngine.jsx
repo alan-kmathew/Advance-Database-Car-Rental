@@ -3,7 +3,7 @@ import axios from 'axios';
 import MapWrapper from '../MapComponent';
 import FormComponent from '../FormComponent';
 import Modal from './modal';
-import '../../styles/searchEngine.css'; // Ensure this CSS file exists and is correctly referenced
+import '../../styles/searchEngine.css'; 
 
 const SearchEngine = () => {
   const [selectedLocation, setSelectedLocation] = useState(null);
@@ -106,6 +106,7 @@ const SearchEngine = () => {
                 <p>Model: {car.model}</p>
                 <p>Price: ${car.price.toFixed(2)}</p>
                 <p>Color: {car.color}</p>
+                <p>Seats: {car.seats}</p>
                 <button onClick={() => alert('Booking functionality not implemented yet')}>Book</button>
               </div>
             </div>
