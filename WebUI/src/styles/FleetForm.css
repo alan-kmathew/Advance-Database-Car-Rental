@@ -1,106 +1,102 @@
- .fleet-opt-form {
-    position: absolute;
-    top: 40px;
-    left: 60px;
-    z-index: 1000;
-    background-color: white;
-    padding: 20px;
-    border-radius: 6px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    width: 300px;
-  }
-  
-  .fleet-opt-form .input-group {
-    margin-bottom: 15px;
-    position: relative;
-  }
-  
-  .fleet-opt-form .input-group label {
-    display: block;
-    margin-bottom: 5px;
-    font-size: 14px;
-    font-weight: normal;
-    color: #333;
-  }
-  
-  .fleet-opt-form .input-group input[type="date"] {
-    width: 100%;
-    padding: 8px 12px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    box-sizing: border-box;
-    font-size: 14px;
-    color: #999;
-    background-color: #fff;
-    appearance: none;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-  }
-  
-  .fleet-opt-form .input-group input[type="date"]:valid {
-    color: #333;
-  }
-  
-  .fleet-opt-form .input-group::after {
-    display: none;
-  }
-  
-  .fleet-opt-form .text-info {
-    font-size: 16px;
-    font-weight: 500;
-    color: #333;
-    margin-top: 5px;
-    margin-bottom: 15px;
-    text-align: center;
-    padding: 10px;
-  }
-  
-  .fleet-opt-form .submit-button {
-    width: 100%;
-    padding: 10px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: normal;
-    color: white;
-    background-color: #ccc;
-    transition: background-color 0.3s;
-    margin-top: 5px;
-  }
-  
-  .fleet-opt-form .submit-button:hover {
-    background-color: #0056b3;
-  }
-  
-  .fleet-opt-form .submit-button:active {
-    background-color: #003d80;
-  }
-  
-  .fleet-opt-form .submit-button:disabled {
-    background-color: #ccc;
-    cursor: not-allowed;
-  }
-  
+.fleet-opt-form {
+  position: absolute;
+  top: 40px;
+  left: 60px;
+  z-index: 1000;
+  background-color: white;
+  padding: 20px;
+  border-radius: 6px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: 300px;
+}
 
-  .fleet-opt-form .result {
-    font-size: 14px;
-    margin-bottom: 15px;
-    color: #333;
-    text-align: center;
-  }
-  
- 
-  @media (max-width: 768px) {
-    .fleet-opt-form {
-      left: 10px;
-      top: 10px;
-      width: calc(100% - 20px);
-      max-width: 300px;
-    }
-  } 
+.fleet-opt-form .input-group {
+  margin-bottom: 15px;
+  position: relative;
+}
 
-  
+.fleet-opt-form .input-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 14px;
+  font-weight: normal;
+  color: #333;
+}
+
+.fleet-opt-form .input-group input[type="date"] {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+  font-size: 14px;
+  color: #999;
+  background-color: #fff;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+.fleet-opt-form .input-group input[type="date"]:valid {
+  color: #333;
+}
+
+.fleet-opt-form .input-group::after {
+  display: none;
+}
+
+.fleet-opt-form .text-info {
+  font-size: 16px;
+  font-weight: 500;
+  color: #333;
+  margin-top: 5px;
+  margin-bottom: 15px;
+  text-align: center;
+  padding: 10px;
+}
+
+.fleet-opt-form .submit-button {
+  width: 100%;
+  padding: 10px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: normal;
+  color: white;
+  background-color: #056edf;
+  transition: background-color 0.3s;
+  margin-top: 5px;
+}
+
+.fleet-opt-form .submit-button:hover {
+  background-color: #04468b;
+}
+
+.fleet-opt-form .submit-button:active {
+  background-color: #04468b;
+}
+
+.fleet-opt-form .submit-button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.fleet-opt-form .result {
+  font-size: 14px;
+  margin-bottom: 15px;
+  color: #333;
+  text-align: center;
+}
+
+@media (max-width: 768px) {
+  .fleet-opt-form {
+    left: 10px;
+    top: 10px;
+    width: calc(100% - 20px);
+    max-width: 300px;
+  }
+}
