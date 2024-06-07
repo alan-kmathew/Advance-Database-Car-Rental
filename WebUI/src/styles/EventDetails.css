@@ -1,4 +1,4 @@
-.event-details-container {
+/* .event-details-container {
     border-radius: 5px;
     padding: 20px;
     margin-top: 10px;
@@ -17,5 +17,30 @@
   
   .event-details-content p {
     margin: 5px 0;
+  }
+   */
+
+   .event-details-container {
+    border-radius: 10px; /* Softer border radius */
+    padding: 20px; /* Adequate padding */
+    margin-top: 20px; /* Increased margin for spacing */
+
+  }
+  
+  .event-details-title {
+    color: #2c3e50; /* Darker shade for contrast */
+    font-size: 22px; /* Slightly increased font size */
+    font-weight: bold; /* Bold title */
+    margin-bottom: 15px; /* Increased margin for spacing */
+  }
+  
+  .event-details-content {
+    color: #555; /* Slightly darker color for readability */
+    font-size: 16px; /* Standard font size */
+    line-height: 1.5; /* Better line spacing */
+  }
+  
+  .event-details-content p {
+    margin: 10px 0; /* Increased margin for paragraph spacing */
   }
   
