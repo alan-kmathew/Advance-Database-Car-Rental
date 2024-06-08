@@ -371,7 +371,7 @@ router.post('/create/booking', async (req, res) => {
 
         const newBooking = await createBooking(req.body);
         if (newBooking) {
-            return res.status(200).json({ message: 'Booking created successfully' });
+            return res.status(200).json(newBooking);
         } else {
             return res.status(404).json({ message: 'Booking not created' });
         }
@@ -388,7 +388,7 @@ router.post('/create/booking', async (req, res) => {
 });
 
 /** 
- * Create a new booking
+ * Get all locations in the map
  */
 
 router.get('/get/allLocationsInMap', async (req, res) => {

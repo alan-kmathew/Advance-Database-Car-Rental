@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import Select from 'react-select';
 
-const FormComponent = ({ locations, onLocationChange, enableSharing, selectedLocation, fromDate, setFromDate, toDate, setToDate, destination, setDestination, onSearch }) => {
+const FormComponent = ({ locations, allLocations, onLocationChange, enableSharing, selectedLocation, fromDate, setFromDate, toDate, setToDate, destination, setDestination, onSearch }) => {
   const [selectedLocationName, setSelectedLocationName] = useState('');
 
   useEffect(() => {
@@ -16,27 +17,36 @@ const FormComponent = ({ locations, onLocationChange, enableSharing, selectedLoc
     onLocationChange(location);
   };
 
+  const handleDestinationChange = (selectedOption) => {
+    setDestination(selectedOption ? selectedOption.value : '');
+  };
+
+  const destinationOptions = allLocations.map((location) => ({
+    value: location.name,
+    label: location.name
+  }));
+
   return (
     <div>
       <form onSubmit={(e) => { e.preventDefault(); onSearch(); }} className="form-container">
-          <div>
-            <label>From Date:</label>
-            <input
-              type="date"
-              value={fromDate}
-              onChange={(e) => setFromDate(e.target.value)}
-              required
-            />
-          </div>
-          <div>
-            <label>To Date:</label>
-            <input
-              type="date"
-              value={toDate}
-              onChange={(e) => setToDate(e.target.value)}
-              required
-            />
-          </div>
+        <div>
+          <label>From Date:</label>
+          <input
+            type="date"
+            value={fromDate}
+            onChange={(e) => setFromDate(e.target.value)}
+            required
+          />
+        </div>
+        <div>
+          <label>To Date:</label>
+          <input
+            type="date"
+            value={toDate}
+            onChange={(e) => setToDate(e.target.value)}
+            required
+          />
+        </div>
         <div>
           <label>Location:</label>
           <select
@@ -55,11 +65,11 @@ const FormComponent = ({ locations, onLocationChange, enableSharing, selectedLoc
         {enableSharing && (
           <div>
             <label>Destination:</label>
-            <input
-              type="text"
-              value={destination}
-              onChange={(e) => setDestination(e.target.value)}
-              required={enableSharing}
+            <Select
+              options={destinationOptions}
+              value={destinationOptions.find(option => option.value === destination)}
+              onChange={handleDestinationChange}
+              isClearable
             />
           </div>
         )}

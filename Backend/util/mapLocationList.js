@@ -3,7 +3,7 @@ const { logger } = require('../util/logging');
 
 const mapLocationList = async () => {
     const redisClient = await dbService.connectRedis();
-    const cacheKey = 'AlllocationList';
+    const cacheKey = 'allLocationList';
 
     try {
         const cachedData = await redisClient.get(cacheKey);

@@ -1,13 +1,19 @@
-const { model } = require("mongoose");
-const logger = require("../util/logging");
-
+const mongoose = require('mongoose');
+const dbService = require('../db/dbconfig/db');
+const { logger } = require('../util/logging');
 
 createBooking = async (booking) => {
     const redisClient = await dbService.connectRedis();
     const cacheKey = 'bookingList';
     try {
         const db = mongoose.connection;
-        const bookingCollection = db.collection('booking');
+        const bookingCollection = db.collection('bookings');
+        const carCollection = db.collection('cars'); 
+        const car = await carCollection.findOne({ _id: new mongoose.Types.ObjectId(booking.carId) });
+        if (!car) {
+            throw new Error('Car not found');
+        }
+
         const newBooking = await bookingCollection.insertOne(booking);
         if (newBooking) {
             const cachedData = await redisClient.get(cacheKey);
@@ -17,7 +23,7 @@ createBooking = async (booking) => {
                 await redisClient.set(cacheKey, JSON.stringify(bookingList), 'EX', 3600); // time 1 hour
                 logger.info('Storing booking data in Redis cache');
             }
-            return true;
+            return { ...booking, plateNo: car.plateNo };
         } else {
             return false;
         }
@@ -30,4 +36,4 @@ createBooking = async (booking) => {
     }
 }
 
-model.exports = { createBooking };
+module.exports = { createBooking };
