@@ -9,6 +9,7 @@ export const getRentPlan = (requirements, carType, setPlan) => {
       remainingCarsNeeded: requirement.carsNeeded,
       carsFromServiceStations: [],
       location: null,
+      requirement: { type: carType, count: requirement.carsNeeded },
     };
   });
 

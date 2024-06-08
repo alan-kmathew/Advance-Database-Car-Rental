@@ -16,6 +16,7 @@ form {
   gap: 10px;
 
   max-height: 80vh;
+  overflow: scroll;
 }
 
 input[type="date"] {
