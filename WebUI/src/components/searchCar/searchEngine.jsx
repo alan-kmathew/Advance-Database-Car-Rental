@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import Swal from 'sweetalert2';
 import MapWrapper from '../MapComponent';
 import FormComponent from '../FormComponent';
-import Modal from './modal';
+import Modal from './modal'; 
 import '../../styles/searchEngine.css'; 
 
 const SearchEngine = () => {
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [enableSharing, setEnableSharing] = useState(false);
   const [locations, setLocations] = useState([]);
+  const [allLocations, setAllLocations] = useState([]);
   const [fromDate, setFromDate] = useState('');
   const [toDate, setToDate] = useState('');
   const [destination, setDestination] = useState('');
@@ -26,14 +28,25 @@ const SearchEngine = () => {
           image: location.image,
           totalCars: location.totalCars,
           cars: []
-        }));
+        })).sort((a, b) => a.name.localeCompare(b.name));
         setLocations(data);
       } catch (error) {
         console.error('Error fetching locations:', error);
       }
     };
 
+    const fetchAllLocations = async () => {
+      try {
+        const response = await axios.get('http://localhost:8020/api/car/get/allLocationsInMap');
+        const sortedData = response.data[0].sort((a, b) => a.name.localeCompare(b.name));
+        setAllLocations(sortedData);
+      } catch (error) {
+        console.error('Error fetching all locations:', error);
+      }
+    };
+
     fetchLocations();
+    fetchAllLocations();
   }, []);
 
   const handleLocationChange = (location) => {
@@ -46,7 +59,7 @@ const SearchEngine = () => {
 
   const handleSearch = async () => {
     if (!selectedLocation || !fromDate || !toDate || (enableSharing && !destination)) {
-      alert('Please fill all required fields.');
+      Swal.fire('Error', 'Please fill all required fields.', 'error');
       return;
     }
 
@@ -55,7 +68,34 @@ const SearchEngine = () => {
       setCars(response.data);
       setShowModal(true);
     } catch (error) {
+      Swal.fire('Error', 'Error fetching car rental data.', 'error');
       console.error('Error fetching car rental data:', error);
+    }
+  };
+
+  const handleBooking = async (car) => {
+    const bookingData = {
+      carId: car._id,
+      startDate: new Date(fromDate),
+      endDate: new Date(toDate),
+      customer: {
+        name: 'Customer 5', 
+        email: 'customer5@example.com' 
+      },
+      price: car.price,
+      servicePointId: selectedLocation.id,
+      type: enableSharing ? 'sharing' : 'rental',
+      bookingDate: new Date(),
+      destination: enableSharing ? destination : null
+    };
+
+    try {
+      const response = await axios.post('http://localhost:8020/api/car/create/booking', bookingData);
+      Swal.fire('Success', `Booking successful! Car Plate Number: ${response.data.plateNo}`, 'success');
+      setShowModal(false);
+    } catch (error) {
+      Swal.fire('Error', 'Failed to create booking.', 'error');
+      console.error('Error creating booking:', error);
     }
   };
 
@@ -84,6 +124,7 @@ const SearchEngine = () => {
       />
       <FormComponent
         locations={locations}
+        allLocations={allLocations}
         onLocationChange={handleLocationChange}
         enableSharing={enableSharing}
         selectedLocation={selectedLocation}
@@ -106,8 +147,7 @@ const SearchEngine = () => {
                 <p>Model: {car.model}</p>
                 <p>Price: ${car.price.toFixed(2)}</p>
                 <p>Color: {car.color}</p>
-                <p>Seats: {car.seats}</p>
-                <button onClick={() => alert('Booking functionality not implemented yet')}>Book</button>
+                <button onClick={() => handleBooking(car)}>Book</button>
               </div>
             </div>
           ))}

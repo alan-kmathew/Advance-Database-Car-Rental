@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
+import Swal from 'sweetalert2';
 import L from 'leaflet';
 import '../styles/MapComponent.css';
 
@@ -17,7 +18,7 @@ const MapComponent = ({ locations, selectedLocation, onLocationChange, fromDate,
 
   useEffect(() => {
     if (selectedLocation) {
-      map.setView(selectedLocation.coordinates, 12); // Adjust zoom level as needed
+      map.setView(selectedLocation.coordinates, 12);
     }
   }, [selectedLocation, map]);
 
@@ -27,7 +28,15 @@ const MapComponent = ({ locations, selectedLocation, onLocationChange, fromDate,
 
   const handleBookNowClick = () => {
     if (!fromDate || !toDate || (enableSharing && !destination)) {
-      alert('Please fill all required fields.');
+      Swal.fire({
+        title: 'Error!',
+        text: 'Please fill all required fields.',
+        icon: 'error',
+        position: 'bottom-end', 
+        showConfirmButton: false,
+        timer: 3000, 
+        toast: true, 
+      });
       return;
     }
     onSearch();
