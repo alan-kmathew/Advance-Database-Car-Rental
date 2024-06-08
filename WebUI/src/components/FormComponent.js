@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import Select from 'react-select';
 
-const FormComponent = ({ locations, onLocationChange, enableSharing, selectedLocation, fromDate, setFromDate, toDate, setToDate, destination, setDestination, onSearch }) => {
+const FormComponent = ({ locations, allLocations, onLocationChange, enableSharing, selectedLocation, fromDate, setFromDate, toDate, setToDate, destination, setDestination, onSearch }) => {
   const [selectedLocationName, setSelectedLocationName] = useState('');
 
   useEffect(() => {
@@ -9,57 +10,71 @@ const FormComponent = ({ locations, onLocationChange, enableSharing, selectedLoc
     }
   }, [selectedLocation]);
 
-  const handleLocationChange = (e) => {
-    const locationName = e.target.value;
-    setSelectedLocationName(locationName);
-    const location = locations.find(loc => loc.name === locationName);
-    onLocationChange(location);
+  const handleLocationChange = (selectedOption) => {
+    if (selectedOption === null) {
+      setSelectedLocationName('');
+      onLocationChange(null);
+    } else {
+      setSelectedLocationName(selectedOption.value);
+      const location = locations.find(loc => loc.name === selectedOption.value);
+      onLocationChange(location);
+    }
   };
 
+  const handleDestinationChange = (selectedOption) => {
+    setDestination(selectedOption ? selectedOption.value : '');
+  };
+
+  const locationOptions = locations.map((location) => ({
+    value: location.name,
+    label: location.name
+  }));
+
+  const destinationOptions = allLocations.map((location) => ({
+    value: location.name,
+    label: location.name
+  }));
+
   return (
-    <div>
+    <div className="search-form">
       <form onSubmit={(e) => { e.preventDefault(); onSearch(); }} className="form-container">
-          <div>
-            <label>From Date:</label>
-            <input
-              type="date"
-              value={fromDate}
-              onChange={(e) => setFromDate(e.target.value)}
-              required
-            />
-          </div>
-          <div>
-            <label>To Date:</label>
-            <input
-              type="date"
-              value={toDate}
-              onChange={(e) => setToDate(e.target.value)}
-              required
-            />
-          </div>
+        <div>
+          <label>From Date:</label>
+          <input
+            type="date"
+            value={fromDate}
+            onChange={(e) => setFromDate(e.target.value)}
+            required
+          />
+        </div>
+        <div>
+          <label>To Date:</label>
+          <input
+            type="date"
+            value={toDate}
+            onChange={(e) => setToDate(e.target.value)}
+            required
+          />
+        </div>
         <div>
           <label>Location:</label>
-          <select
-            value={selectedLocationName}
+          <Select
+            options={locationOptions}
+            value={locationOptions.find(option => option.value === selectedLocationName)}
             onChange={handleLocationChange}
-            required
-          >
-            <option value="">Select a location</option>
-            {locations.map((location, index) => (
-              <option key={index} value={location.name}>
-                {location.name}
-              </option>
-            ))}
-          </select>
+            isClearable
+            classNamePrefix="react-select"
+          />
         </div>
         {enableSharing && (
           <div>
             <label>Destination:</label>
-            <input
-              type="text"
-              value={destination}
-              onChange={(e) => setDestination(e.target.value)}
-              required={enableSharing}
+            <Select
+              options={destinationOptions}
+              value={destinationOptions.find(option => option.value === destination)}
+              onChange={handleDestinationChange}
+              isClearable
+              classNamePrefix="react-select"
             />
           </div>
         )}

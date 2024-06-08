@@ -4,8 +4,9 @@ import Passenger from '../components/Passenger/Passenger.jsx';
 import SearchEngine from  '../components/searchCar/searchEngine.jsx';
 import Usecase5 from '../components/usecase5/Usecase5.jsx';
 import '../styles/Dashboard.css';
-import EventBooking from '../components/eventBooking/EventBooking.jsx';
+
 import FleetOpt from '../components/fleetOptimisation/FleetOpt.jsx';
+import GroupBooking from '../components/groupBooking/GroupBooking.jsx';
 
 
 function Dashboard() {
@@ -19,7 +20,7 @@ function Dashboard() {
             <Route path="/" element={<Navigate to="/searchEngine" />} />
             <Route path="/searchEngine" element={<SearchEngine />} />
             <Route path="/passenger" element={<Passenger />} />
-            <Route path="/eventBooking" element={<EventBooking />} />
+            <Route path="/eventBooking" element={<GroupBooking />} />
             <Route path="/fleetopt" element={<FleetOpt />} />
             <Route path="/usecase5" element={<Usecase5 />} />
           </Routes>

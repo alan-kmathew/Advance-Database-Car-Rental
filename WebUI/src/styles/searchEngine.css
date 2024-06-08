@@ -1,125 +1,143 @@
-/* searchEngine.css */
 .search-engine {
-    position: relative;
-  }
-  
-  .toggle-container {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    background: white;
-    padding: 10px;
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    z-index: 1000; /* Ensure the toggle is above the map */
-  }
-  
-  .form-container {
-    position: absolute;
-    top: 20px;
-    left: 50px;
-    background: white;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    z-index: 1000; /* Ensure the form is above the map */
-    max-width: 350px;
-    width: 100%;
-  }
-  
-  .form-container label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: bold; /* Added font-weight */
-    font-size: 14px; /* Adjusted font size */
-  }
-  
-  .form-container input,
-  .form-container select {
-    margin-bottom: 10px;
-    padding: 10px; /* Increased padding */
-    width: 100%;
-    box-sizing: border-box;
-    border: 1px solid #ccc; /* Added border */
-    border-radius: 5px; /* Added border-radius */
-    font-size: 14px; /* Increased font size */
-    transition: border-color 0.3s; /* Added transition */
-  }
-  
-  .form-container input:focus,
-  .form-container select:focus {
-    border-color: #007bff; /* Change border color on focus */
-    outline: none;
-  }
-  
-  .form-container button {
-    display: inline-block;
-    padding: 10px 15px; /* Increased padding */
-    font-size: 16px; /* Adjusted font size */
-    border-radius: 5px;
-    color: #fff;
-    background-color: #007bff; /* Blue background */
-    border: none;
-    cursor: pointer;
-    text-align: center;
-    transition: background-color 0.3s; /* Added transition */
-  }
-  
-  .form-container button:hover {
-    background-color: #0056b3; /* Darker blue on hover */
-  }
-  
-  /* Smaller toggle switch CSS */
-  .switch {
-    position: relative;
-    display: inline-block;
-    width: 40px; /* Reduced width */
-    height: 20px; /* Reduced height */
-  }
-  
-  .switch input {
-    opacity: 0;
-    width: 0;
-    height: 0;
-  }
-  
-  .slider {
-    position: absolute;
-    cursor: pointer;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: #ccc;
-    transition: .4s;
-    border-radius: 20px; /* Adjusted border-radius */
-  }
-  
-  .slider:before {
-    position: absolute;
-    content: "";
-    height: 14px; /* Reduced height */
-    width: 14px; /* Reduced width */
-    left: 3px; /* Adjusted position */
-    bottom: 3px; /* Adjusted position */
-    background-color: white;
-    transition: .4s;
-    border-radius: 50%;
-  }
-  
-  input:checked + .slider {
-    background-color: #2196F3;
-  }
-  
-  input:checked + .slider:before {
-    transform: translateX(20px); /* Adjusted translation */
-  }
-  
-  .txt {
-    font-size: 15px;
-    margin-left: 10px;
-  }
-  
+  position: relative;
+}
+
+.toggle-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: white;
+  padding: 10px;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  z-index: 1000; /* Ensure the toggle is above the map */
+}
+
+/* .search-form {
+  position: absolute;
+  top: 20px;
+  left: 50px;
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  z-index: 1000; 
+  max-width: 350px;
+  width: 100%;
+} */
+
+.search-form label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold; /* Added font-weight */
+  font-size: 14px; /* Adjusted font size */
+}
+
+.search-form input {
+  margin-bottom: 10px;
+  padding: 10px; /* Increased padding */
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #ccc; /* Added border */
+  border-radius: 5px; /* Added border-radius */
+  font-size: 14px; /* Increased font size */
+  transition: border-color 0.3s; /* Added transition */
+}
+
+.search-form input:focus {
+  border-color: #007bff; /* Change border color on focus */
+  outline: none;
+}
+
+.search-form .react-select__control {
+  margin-bottom: 10px;
+  padding: 5px;
+  border: 1px solid #ccc; /* Added border */
+  border-radius: 5px; /* Added border-radius */
+  font-size: 14px; /* Increased font size */
+  transition: border-color 0.3s; /* Added transition */
+}
+
+.search-form .react-select__control--is-focused {
+  border-color: #007bff; /* Change border color on focus */
+  outline: none;
+  box-shadow: none;
+}
+
+.search-form .react-select__menu {
+  z-index: 2000; /* Ensure the dropdown menu is above other elements */
+  border-radius: 5px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.search-form button {
+  margin-top: 10px;
+  display: inline-block;
+  padding: 10px 15px; /* Increased padding */
+  font-size: 16px; /* Adjusted font size */
+  border-radius: 5px;
+  color: #fff;
+  background-color: #007bff; /* Blue background */
+  border: none;
+  cursor: pointer;
+  text-align: center;
+  transition: background-color 0.3s; /* Added transition */
+}
+
+.search-form button:hover {
+  background-color: #0056b3; /* Darker blue on hover */
+}
+
+/* Smaller toggle switch CSS */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 40px; /* Reduced width */
+  height: 20px; /* Reduced height */
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: .4s;
+  border-radius: 20px; /* Adjusted border-radius */
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 14px; /* Reduced height */
+  width: 14px; /* Reduced width */
+  left: 3px; /* Adjusted position */
+  bottom: 3px; /* Adjusted position */
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: #2196F3;
+}
+
+input:checked + .slider:before {
+  transform: translateX(20px); /* Adjusted translation */
+}
+
+.txt {
+  font-size: 15px;
+  margin-left: 10px;
+}

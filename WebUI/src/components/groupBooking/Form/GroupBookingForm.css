@@ -1,0 +1,97 @@
+form {
+  position: absolute;
+  z-index: 401;
+  top: 40px;
+  margin-left: 60px;
+
+  background: #ffffff;
+  padding: 20px;
+  border-radius: 6px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  width: 350px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  max-height: 80vh;
+}
+
+input[type="date"] {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+  font-size: 14px;
+  color: #999;
+  background-color: #fff;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+input[type="date"]:valid {
+  color: #333;
+}
+
+.CityCountInputContainer {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  padding: 10px;
+  gap: 10px;
+}
+.CityCountInputContainer > div {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+.CityCountInputContainer > div > * {
+  width: 100%;
+}
+.CityCountInputContainer > div > input {
+  width: 60px;
+  border: 1px solid #ccc;
+  padding: 10px 5px;
+  border-radius: 6px;
+}
+.CityCountInputContainer > div > .removeCityCount {
+  width: 15px;
+  margin: 0;
+  cursor: pointer;
+  opacity: 0.3;
+}
+
+.addRequirement {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  height: 30px;
+  border: 1px solid #1388fc;
+  margin: 10px 0;
+  background: #7cbeff;
+  border-radius: 6px;
+  color: #fff;
+}
+.addRequirement p {
+  text-align: center;
+}
+
+.submitButton {
+  height: 50px;
+  background: #5cadff;
+  border: 1px solid #1388fc;
+  border-radius: 6px;
+  color: #fff;
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin-block: 20px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
