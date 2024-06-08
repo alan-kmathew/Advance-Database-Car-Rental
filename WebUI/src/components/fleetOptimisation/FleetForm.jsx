@@ -9,9 +9,6 @@ const FleetOptForm = ({ setServiceStations }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(`Fetching booking details from ${fromDate} to ${toDate}`);
-    console.log(`Number of service stations: ${stationCount}`);
-
     try {
       const response = await axios.get(
         "http://localhost:8020/api/car/get/station/highbookings",
@@ -28,6 +25,10 @@ const FleetOptForm = ({ setServiceStations }) => {
         longitude: station.longitude,
         servicePointName: station.servicePointName,
         totalBookings: station.totalBookings,
+        totalCarsAvailable: station.totalCarsAvailable,
+        nearestServiceStations: station.nearestServiceStations,
+        carList: station.carList,
+        servicePointImage: station.servicePointImage,
       }));
       setServiceStations(stations);
     } catch (error) {
