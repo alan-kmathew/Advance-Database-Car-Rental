@@ -14,6 +14,7 @@ const {
     getServiceStationWithMostBookings,
     getRideSharingCarDetails,
     executeMultipleCitiesShortestPathQuery,
+    getCoordinatesOfCity,
 } = require('../services/car.services');
 const dbService = require('../db/dbconfig/db');
 
@@ -448,4 +449,44 @@ router.get('/get/rentedCarlist', async (req, res) => {
     }
 });
 
+
+/**
+ * Get the nearest service station for given location. 
+ * Also Returns the coordinates of the requested city
+ */
+router.get('/get/nearest/serviceStationDetailed', async (req, res) => {
+    logger.info(`Entering ${req.baseUrl}${req.path}`);
+    try {
+        const validationErrors = validationResult(req);
+
+        if (!validationErrors.isEmpty()) {
+            const erroMessage = validationErrors.array();
+            return res.status(400).json({
+                timestamp: new Date(),
+                status: 400,
+                error: 'Bad Request',
+                message: erroMessage,
+                path: `${req.baseUrl}${req.path}`,
+            });
+        }
+        const neo4jSession = await dbService.connectNeo4j();
+        const nearestServiceStationResult = await executeNearestServiceStationQuery(
+            neo4jSession,
+            req.query.cityName
+        );
+        const requestCityLocation = await getCoordinatesOfCity(neo4jSession, req.query.cityName);
+        return res.status(200).json({ nearestServiceStationResult, requestCityLocation });
+    } catch (err) {
+        logger.error(err);
+        return res.status(500).json({
+            timestamp: new Date(),
+            status: 500,
+            error: 'Internal Server Error',
+            message: err.message,
+            path: `${req.baseUrl}${req.path}`,
+        });
+    }
+});
+
 module.exports = router;
+
