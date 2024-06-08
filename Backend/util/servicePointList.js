@@ -1,7 +1,6 @@
 const mongoose = require('mongoose');
 const dbService = require('../db/dbconfig/db');
 const { logger } = require('../util/logging');
-const { idToLocation } = require('./IdToLocation');
 
 const servicePointList = async () => {
     const redisClient = await dbService.connectRedis();
@@ -22,29 +21,49 @@ const servicePointList = async () => {
             .toArray();
         logger.info('Fetching service points from MongoDB');
 
-        // Fetch coordinates for each service point and count the number of cars
-        for (let i = 0; i < servicePoints.length; i++) {
-            const coordinates = await idToLocation(servicePoints[i]._id);
-            const servicePoint = await db
-                .collection('servicePoints')
-                .findOne({ _id: servicePoints[i]._id });
-            const carsCount = servicePoint.cars.length;
-            servicePoints[i].coordinates = coordinates;
-            servicePoints[i].totalCars = carsCount;
+        try {
+            const session = await dbService.connectNeo4j();
+        
+            for (let i = 0; i < servicePoints.length; i++) {
+                const query = `MATCH (s:ServiceStations {serviceStationId: "${servicePoints[i]._id}"})
+                               MATCH (s)-[:LOCATED_IN]->(c:City)
+                               RETURN c.latitude as lat, c.longitude as lon`;
+                const result = await session.run(query);
+        
+                if (result.records.length === 0) {
+                    throw new Error('No location found for the given service point ID');
+                }
+        
+                const lat = result.records[0].get('lat');
+                const lon = result.records[0].get('lon');
+                servicePoints[i].coordinates = `${lat},${lon}`;
+        
+                const servicePoint = await db
+                    .collection('servicePoints')
+                    .findOne({ _id: servicePoints[i]._id });
+                const carsCount = servicePoint.cars.length;
+                servicePoints[i].totalCars = carsCount;
+            }
+        
+            await session.close();
+        
+            await redisClient.set(cacheKey, JSON.stringify(servicePoints), {
+                EX: 3600,
+            });
+            logger.info('Storing service points data in Redis cache');
+        
+            await redisClient.disconnect();
+            logger.info('Closing Redis connection');
+        
+            return servicePoints;
+        } catch (error) {
+            logger.error('Error fetching service points:', error);
+            throw error;
         }
-        await redisClient.set(cacheKey, JSON.stringify(servicePoints), {
-            EX: 3600,
-        });
-        logger.info('Storing service points data in Redis cache');
-
-        await redisClient.disconnect();
-        logger.info('Closing Redis connection');
-
-        return servicePoints;
-    } catch (error) {
+    }
+    catch (error) {
         logger.error('Error fetching service points:', error);
         throw error;
     }
-};
-
+}   
 module.exports = { servicePointList };
