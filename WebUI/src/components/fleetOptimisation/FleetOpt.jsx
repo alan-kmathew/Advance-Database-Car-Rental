@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import FleetOptForm from "./FleetForm";
+import Legend from "./Legend";
 import "../../styles/FleetOpt.css";
-import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
-import CustomPopup from "./CustomPopup";
+import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import L from "leaflet";
+import "leaflet-curve";
+import FleetModal from "./FleetModal";
 
-// Define icons
 const ServicePointIcon = L.divIcon({
   className: "custom-icon",
   html:
@@ -25,12 +26,24 @@ const ServicePointIconHighlighted = L.divIcon({
   iconAnchor: [20, 40],
 });
 
+const NearestServicePointIconHighlighted = L.divIcon({
+  className: "custom-icon highlighted-icon",
+  html:
+    '<div class="inner-icon"><img src="' +
+    require("../../Assets/green-location-icon.png") +
+    '" style="width: 40px; height: 40px;" /></div>',
+  iconAnchor: [20, 40],
+});
+
 function FleetOpt() {
   const [serviceStations, setServiceStations] = useState([]);
   const [allServicePoints, setAllServicePoints] = useState([]);
-  const [popupInfo, setPopupInfo] = useState(null);
-  const highlightedMarkersRefs = useRef([]);
   const mapRef = useRef();
+  const popupRefs = useRef([]);
+
+  const [filteredServicePoints, setFilteredServicePoints] = useState([]);
+  const [showModal, setShowModal] = useState(false);
+  const [selectedStation, setSelectedStation] = useState(null);
 
   useEffect(() => {
     const fetchAllServicePoints = async () => {
@@ -46,7 +59,7 @@ function FleetOpt() {
             .map((coord) => parseFloat(coord)),
           image: location.image,
           totalCars: location.totalCars,
-          cars: [],
+          cars: location.cars,
         }));
         setAllServicePoints(data);
       } catch (error) {
@@ -56,47 +69,83 @@ function FleetOpt() {
     fetchAllServicePoints();
   }, []);
 
-  const filteredServicePoints = allServicePoints.filter(
-    (point) =>
-      !serviceStations.some(
+  useEffect(() => {
+    const filteredPoints = allServicePoints.filter((point) => {
+      const isServiceStation = serviceStations.some(
         (station) => station.servicePointName === point.name
-      )
-  );
-
-  const handlePopupOpen = (point, event) => {
-    const { containerPoint } = event;
-    const mapContainer = mapRef.current.getContainer();
-    const mapBounds = mapContainer.getBoundingClientRect();
-    const popupHeight = 150;
-    const popupWidth = 150;
-
-    let adjustedX = containerPoint.x;
-    let adjustedY = containerPoint.y;
-
-    if (containerPoint.x + popupWidth / 2 > mapBounds.width) {
-      adjustedX = mapBounds.width - popupWidth / 2;
-    } else if (containerPoint.x - popupWidth / 2 < 0) {
-      adjustedX = popupWidth / 2;
-    }
-
-    if (containerPoint.y - popupHeight < 0) {
-      adjustedY = popupHeight;
-    }
-
-    setPopupInfo({ ...point, position: { x: adjustedX, y: adjustedY } });
-  };
-
-  const handlePopupClose = () => {
-    setPopupInfo(null);
-  };
-
-  const MapEvents = () => {
-    useMapEvents({
-      click: () => {
-        handlePopupClose();
-      },
+      );
+      const isNearestServiceStation = serviceStations.some((station) =>
+        station.nearestServiceStations.some(
+          (nearestStation) =>
+            nearestStation.latitude === point.coordinates[0] &&
+            nearestStation.longitude === point.coordinates[1]
+        )
+      );
+      return !isServiceStation && !isNearestServiceStation;
     });
+
+    setFilteredServicePoints(filteredPoints);
+  }, [allServicePoints, serviceStations]);
+
+  const handleMoreDetailsClick = (station, popupIndex) => {
+    popupRefs.current[popupIndex].remove(); // Close the popup
+    setSelectedStation(station);
+    setShowModal(true);
+  };
+
+  const handleClosePopup = (popupIndex) => {
+    popupRefs.current[popupIndex].remove();
+  };
+
+  const Curves = ({ stations }) => {
+    const map = useMap();
+
+    useEffect(() => {
+      stations.forEach((station) => {
+        station.nearestServiceStations.forEach((nearestStation) => {
+          const from = [station.latitude, station.longitude];
+          const to = [nearestStation.latitude, nearestStation.longitude];
+          const latlngs = createCurve(from, to);
+
+          L.curve(latlngs, {
+            color: "darkred",
+            weight: 3,
+            opacity: 0.8,
+            dashArray: "5, 5",
+          }).addTo(map);
+        });
+      });
+
+      return () => {
+        map.eachLayer((layer) => {
+          if (layer instanceof L.Curve) {
+            map.removeLayer(layer);
+          }
+        });
+      };
+    }, [map, stations]);
+
     return null;
+  };
+
+  const createCurve = (latlng1, latlng2) => {
+    const offsetX = latlng2[1] - latlng1[1];
+    const offsetY = latlng2[0] - latlng1[0];
+
+    const r = Math.sqrt(Math.pow(offsetX, 2) + Math.pow(offsetY, 2));
+    const theta = Math.atan2(offsetY, offsetX);
+
+    const thetaOffset = Math.PI / 10;
+
+    const r2 = r / 2 / Math.cos(thetaOffset);
+    const theta2 = theta - thetaOffset;
+
+    const midpointX = r2 * Math.cos(theta2) + latlng1[1];
+    const midpointY = r2 * Math.sin(theta2) + latlng1[0];
+
+    const midpointLatLng = [midpointY, midpointX];
+
+    return ["M", latlng1, "Q", midpointLatLng, latlng2];
   };
 
   return (
@@ -113,32 +162,144 @@ function FleetOpt() {
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         />
-        <MapEvents />
-        {filteredServicePoints.map((point) => (
+        {filteredServicePoints.map((point, index) => (
           <Marker
-            key={point.id}
-            position={point.coordinates}
+            key={point?.id}
+            position={point?.coordinates}
             icon={ServicePointIcon}
-            eventHandlers={{
-              click: (event) => handlePopupOpen(point, event),
-            }}
-          ></Marker>
+          >
+            <Popup ref={(ref) => (popupRefs.current[index] = ref)}>
+              <div className="popup">
+                <button
+                  className="close-popup-btn"
+                  onClick={() => handleClosePopup(index)}
+                >
+                  ✕
+                </button>
+                <h3>{point.name} Station</h3>
+                <img src={point.image} alt={point.name} />
+                <p>Total Cars: {point.totalCars}</p>
+              </div>
+            </Popup>
+          </Marker>
         ))}
 
         {serviceStations.map((station, index) => (
           <Marker
             key={index}
-            position={[station.latitude, station.longitude]}
+            position={[station?.latitude, station?.longitude]}
             icon={ServicePointIconHighlighted}
-            ref={(el) => (highlightedMarkersRefs.current[index] = el)}
-            eventHandlers={{
-              click: (event) => handlePopupOpen(station, event),
-            }}
-          ></Marker>
+          >
+            <Popup
+              ref={(ref) =>
+                (popupRefs.current[filteredServicePoints.length + index] = ref)
+              }
+            >
+              <div style={{ alignContent: "flex-start" }} className="popup">
+                <button
+                  className="close-popup-btn"
+                  onClick={() =>
+                    handleClosePopup(filteredServicePoints.length + index)
+                  }
+                >
+                  ✕
+                </button>
+                <h3>{station.servicePointName} Station</h3>
+                <img
+                  src={station.servicePointImage}
+                  alt={station.servicePointName}
+                />
+                <p>Total Cars: {station.totalCarsAvailable}</p>
+                <p>Total Bookings: {station.totalBookings}</p>
+                <a
+                  style={{ marginTop: "10px" }}
+                  href="#"
+                  className="more-details-link"
+                  onClick={() =>
+                    handleMoreDetailsClick(
+                      station,
+                      filteredServicePoints.length + index
+                    )
+                  }
+                >
+                  More Details
+                </a>
+              </div>
+            </Popup>
+          </Marker>
         ))}
 
-        {popupInfo && (
-          <CustomPopup info={popupInfo} onClose={handlePopupClose} />
+        {serviceStations.map((station) =>
+          station?.nearestServiceStations.map((nearestStation, index) => (
+            <Marker
+              key={`${station?.servicePointId}-${index}`}
+              position={[nearestStation?.latitude, nearestStation?.longitude]}
+              icon={NearestServicePointIconHighlighted}
+            >
+              <Popup
+                ref={(ref) =>
+                  (popupRefs.current[
+                    filteredServicePoints.length +
+                      serviceStations.length +
+                      index
+                  ] = ref)
+                }
+              >
+                <div>
+                  <button
+                    className="close-popup-btn"
+                    onClick={() =>
+                      handleClosePopup(
+                        filteredServicePoints.length +
+                          serviceStations.length +
+                          index
+                      )
+                    }
+                  >
+                    ✕
+                  </button>
+                  <h3>{nearestStation.locatedInCity} Station</h3>
+                  <p>Total Cars: {nearestStation.totalCarsAvailable}</p>
+                  <p>Total Bookings: {nearestStation.totalBookings}</p>
+                  <a
+                    href="#"
+                    className="more-details-link"
+                    onClick={() =>
+                      handleMoreDetailsClick(
+                        nearestStation,
+                        filteredServicePoints.length +
+                          serviceStations.length +
+                          index
+                      )
+                    }
+                  >
+                    More Details
+                  </a>
+                </div>
+              </Popup>
+            </Marker>
+          ))
+        )}
+
+        <Curves stations={serviceStations} />
+
+        <Legend />
+        {selectedStation && (
+          <FleetModal show={showModal} onClose={() => setShowModal(false)}>
+            <h1>Available Cars</h1>
+            <div className="car-list">
+              {selectedStation.carList.map((car) => (
+                <div key={car._id} className="car-item">
+                  <img src={car.image} alt={car.model} />
+                  <div className="car-item-details">
+                    <p>Model: {car.model}</p>
+                    <p>Type: {car.type}</p>
+                    <p>Seats: {car.seats}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </FleetModal>
         )}
       </MapContainer>
     </div>

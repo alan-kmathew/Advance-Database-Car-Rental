@@ -1,0 +1,74 @@
+.planViewContainer {
+  position: absolute;
+  z-index: 401;
+  top: 40px;
+  margin-left: 60px;
+
+  background: #ffffff;
+  padding: 20px;
+  border-radius: 6px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  width: 350px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  max-height: 80vh;
+  overflow: scroll;
+}
+
+.backButton {
+  margin: 0;
+  padding: 5px 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  width: fit-content;
+  cursor: pointer;
+}
+
+.planItem {
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  padding: 10px;
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  transition: box-shadow 0.5s;
+  cursor: pointer;
+}
+.planItem > .userCityName {
+  margin: 0;
+}
+.planItem > .userRequirement {
+  margin: 0;
+}
+.planItem th {
+  padding: 5px;
+}
+.planItem tr:first-child {
+  background: #f3f3f3;
+}
+.planItem th:first-child {
+  text-align: left;
+}
+.planItem th:last-child {
+  text-align: right;
+}
+.planItem td {
+  padding: 5px;
+}
+.planItem td:last-child {
+  text-align: right;
+}
+
+.errorMessage {
+  margin: 0;
+  color: #ff5c5c;
+}
+
+.selectedUserCity {
+  box-shadow: 3px 0px 15px #d3d3d3;
+}

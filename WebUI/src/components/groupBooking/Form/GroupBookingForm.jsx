@@ -33,8 +33,6 @@ const GroupBookingForm = ({ setPlan }) => {
   };
 
   const removeRequirement = (index) => {
-    let test = requirements.filter((r, i) => i != index);
-    console.log(test);
     setRequirements(requirements.filter((r, i) => i != index));
   };
 
