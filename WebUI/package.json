@@ -9,6 +9,7 @@
     "axios": "^1.7.2",
     "leaflet": "^1.9.4",
     "leaflet-css": "^0.1.0",
+    "leaflet-curve": "^1.0.0",
     "react": "^18.3.1",
     "react-bootstrap-typeahead": "^6.3.2",
     "react-dom": "^18.3.1",
