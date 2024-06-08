@@ -426,6 +426,23 @@ const getRideSharingCarDetails = async (
     }
 };
 
+const getCoordinatesOfCity = async (session, cityName) => {
+    try {
+        const fetchCoordinatesQuery = `
+        WITH "${cityName}" AS targetCityName
+        MATCH (targetCity:City {name: targetCityName})
+        RETURN 
+        targetCity.name AS name,
+        targetCity.latitude AS lat,
+        targetCity.longitude AS lon;
+      `;
+        const result = await session.run(fetchCoordinatesQuery);
+        return result.records[0].toObject();
+    } catch (error) {
+        logger.error('Error fetching coordinates:', error);
+    }
+};
+
 module.exports = {
     executeShortestPathQuery,
     executeNearestServiceStationQuery,
@@ -433,4 +450,5 @@ module.exports = {
     getServiceStationWithMostBookings,
     getRideSharingCarDetails,
     executeMultipleCitiesShortestPathQuery,
+    getCoordinatesOfCity
 };
