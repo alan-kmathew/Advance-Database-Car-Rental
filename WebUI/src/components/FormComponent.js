@@ -10,16 +10,25 @@ const FormComponent = ({ locations, allLocations, onLocationChange, enableSharin
     }
   }, [selectedLocation]);
 
-  const handleLocationChange = (e) => {
-    const locationName = e.target.value;
-    setSelectedLocationName(locationName);
-    const location = locations.find(loc => loc.name === locationName);
-    onLocationChange(location);
+  const handleLocationChange = (selectedOption) => {
+    if (selectedOption === null) {
+      setSelectedLocationName('');
+      onLocationChange(null);
+    } else {
+      setSelectedLocationName(selectedOption.value);
+      const location = locations.find(loc => loc.name === selectedOption.value);
+      onLocationChange(location);
+    }
   };
 
   const handleDestinationChange = (selectedOption) => {
     setDestination(selectedOption ? selectedOption.value : '');
   };
+
+  const locationOptions = locations.map((location) => ({
+    value: location.name,
+    label: location.name
+  }));
 
   const destinationOptions = allLocations.map((location) => ({
     value: location.name,
@@ -27,7 +36,7 @@ const FormComponent = ({ locations, allLocations, onLocationChange, enableSharin
   }));
 
   return (
-    <div>
+    <div className="search-form">
       <form onSubmit={(e) => { e.preventDefault(); onSearch(); }} className="form-container">
         <div>
           <label>From Date:</label>
@@ -49,18 +58,13 @@ const FormComponent = ({ locations, allLocations, onLocationChange, enableSharin
         </div>
         <div>
           <label>Location:</label>
-          <select
-            value={selectedLocationName}
+          <Select
+            options={locationOptions}
+            value={locationOptions.find(option => option.value === selectedLocationName)}
             onChange={handleLocationChange}
-            required
-          >
-            <option value="">Select a location</option>
-            {locations.map((location, index) => (
-              <option key={index} value={location.name}>
-                {location.name}
-              </option>
-            ))}
-          </select>
+            isClearable
+            classNamePrefix="react-select"
+          />
         </div>
         {enableSharing && (
           <div>
@@ -70,6 +74,7 @@ const FormComponent = ({ locations, allLocations, onLocationChange, enableSharin
               value={destinationOptions.find(option => option.value === destination)}
               onChange={handleDestinationChange}
               isClearable
+              classNamePrefix="react-select"
             />
           </div>
         )}
