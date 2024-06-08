@@ -20,44 +20,19 @@
   animation: jump 1s infinite;
 }
 
-.custom-popup {
-  position: absolute;
-  background: white;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  padding: 10px;
-  width: 200px;
+.popup img {
+  max-width: 100%;
   height: auto;
-  z-index: 1000;
-  transform: translate(-50%, -100%);
-  cursor: auto;
-  white-space: normal;
+  border-radius: 5px;
+  margin-bottom: 5px;
 }
 
-.custom-popup h3 {
-  font-size: 16px;
-  margin: 0;
-  margin-right: 20px;
-  white-space: normal;
-}
-
-.custom-popup p {
-  font-size: 14px;
-  margin: 10px 0;
-}
-
-.custom-popup-close-btn {
+.close-popup-btn {
   position: absolute;
-  top: 5px;
+  top: 3px;
   right: 5px;
-  cursor: pointer; /* Ensure cursor is set to pointer */
-  font-size: 14px;
-  background: transparent;
+  background: none;
   border: none;
-  color: black;
-}
-
-.leaflet-container {
-  cursor: auto !important; /* Ensure cursor is set to auto within the map container */
+  font-size: 16px;
+  cursor: pointer;
 }
