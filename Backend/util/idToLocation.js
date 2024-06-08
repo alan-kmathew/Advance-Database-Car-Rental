@@ -7,9 +7,9 @@ const idToLocation = async (servicePointId) => {
                        MATCH (s)-[:LOCATED_IN]->(c:City)
                        RETURN c.latitude as lat, c.longitude as lon`;
         const result = await session.run(query);
-        result.records.forEach((record) => {
-            console.log(record.get('lat'), record.get('lon'));
-        });
+        // result.records.forEach((record) => {
+        //     console.log(record.get('lat'), record.get('lon'));
+        // });
         await session.close();
         
         if (result.records.length === 0) {

@@ -11,7 +11,7 @@ const mapLocationList = async () => {
             logger.info('Fetching location list from Redis cache');
             await redisClient.disconnect();
             logger.info('Closing Redis connection');
-            return JSON.parse(cachedData);
+            return JSON.parse(cachedData); 
         }
 
         const session = await dbService.connectNeo4j();
@@ -27,18 +27,19 @@ const mapLocationList = async () => {
         });
 
         await session.close();
-        await redisClient.set(cacheKey, JSON.stringify(locations), {
-            EX: 3600,
-        });
-        logger.info('Storing location data in Redis cache');
 
-        await redisClient.disconnect();
-        logger.info('Closing Redis connection');
+        await redisClient.set(cacheKey, JSON.stringify(locations), 'EX', 360000);
+        logger.info('Storing location data in Redis cache');
 
         return locations;
     } catch (error) {
         logger.error('Error fetching location list:', error);
         throw error;
+    } finally {
+        if (redisClient && redisClient.connected) {
+            await redisClient.disconnect();
+            logger.info('Closing Redis connection');
+        }
     }
 }
 

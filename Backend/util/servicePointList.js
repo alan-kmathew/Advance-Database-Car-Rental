@@ -14,6 +14,7 @@ const servicePointList = async () => {
             logger.info('Closing Redis connection');
             return JSON.parse(cachedData);
         }
+
         const db = mongoose.connection;
         const servicePoints = await db
             .collection('servicePoints')
@@ -22,6 +23,7 @@ const servicePointList = async () => {
         logger.info('Fetching service points from MongoDB');
 
         try {
+            logger.info('Fetching location data from Neo4j');
             const session = await dbService.connectNeo4j();
         
             for (let i = 0; i < servicePoints.length; i++) {
@@ -46,7 +48,8 @@ const servicePointList = async () => {
             }
         
             await session.close();
-        
+            logger.info('closing Neo4j session');
+
             await redisClient.set(cacheKey, JSON.stringify(servicePoints), {
                 EX: 3600,
             });
