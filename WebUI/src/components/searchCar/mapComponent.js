@@ -3,7 +3,7 @@ import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import Swal from 'sweetalert2';
 import L from 'leaflet';
-import '../styles/MapComponent.css';
+import '../../styles/searchCar/mapComponent.css';
 
 // Fix the default icon issue in Leaflet
 delete L.Icon.Default.prototype._getIconUrl;

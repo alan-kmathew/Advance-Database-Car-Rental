@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Swal from "sweetalert2";
-import MapWrapper from "../MapComponent";
-import FormComponent from "../FormComponent";
+import MapWrapper from "./mapComponent";
+import FormComponent from "./formComponent";
 import Modal from "./modal";
-import "../../styles/searchEngine.css";
+import "../../styles/searchCar/searchEngine.css";
 
 const SearchEngine = () => {
   const [selectedLocation, setSelectedLocation] = useState(null);
@@ -17,47 +17,46 @@ const SearchEngine = () => {
   const [cars, setCars] = useState([]);
   const [showModal, setShowModal] = useState(false);
 
+  const fetchLocations = async () => {
+    try {
+      const response = await axios.get(
+        "http://localhost:8020/api/car/get/servicePoints"
+      );
+      const data = response.data
+        .map((location) => ({
+          id: location._id,
+          name: location.name,
+          coordinates: location.coordinates
+            .split(",")
+            .map((coord) => parseFloat(coord)),
+          image: location.image,
+          totalCars: location.totalCars,
+          cars: [],
+        }))
+        .sort((a, b) => a.name.localeCompare(b.name));
+      setLocations(data);
+    } catch (error) {
+      console.error("Error fetching locations:", error);
+    }
+  };
+
   useEffect(() => {
-    const fetchLocations = async () => {
-      try {
-        const response = await axios.get(
-          "http://localhost:8020/api/car/get/servicePoints"
-        );
-        const data = response.data
-          .map((location) => ({
-            id: location._id,
-            name: location.name,
-            coordinates: location.coordinates
-              .split(",")
-              .map((coord) => parseFloat(coord)),
-            image: location.image,
-            totalCars: location.totalCars,
-            cars: [],
-          }))
-          .sort((a, b) => a.name.localeCompare(b.name));
-        setLocations(data);
-      } catch (error) {
-        console.error("Error fetching locations:", error);
-      }
-    };
-
-    const fetchAllLocations = async () => {
-      try {
-        const response = await axios.get(
-          "http://localhost:8020/api/car/get/allLocationsInMap"
-        );
-        const sortedData = response.data[0].sort((a, b) =>
-          a.name.localeCompare(b.name)
-        );
-        setAllLocations(sortedData);
-      } catch (error) {
-        console.error("Error fetching all locations:", error);
-      }
-    };
-
     fetchLocations();
-    fetchAllLocations();
   }, []);
+
+  const fetchAllLocations = async () => {
+    try {
+      const response = await axios.get(
+        "http://localhost:8020/api/car/get/allLocationsInMap"
+      );
+      const sortedData = response.data[0].sort((a, b) =>
+        a.name.localeCompare(b.name)
+      );
+      setAllLocations(sortedData);
+    } catch (error) {
+      console.error("Error fetching all locations:", error);
+    }
+  };
 
   const handleLocationChange = (location) => {
     setSelectedLocation(location);
@@ -65,6 +64,12 @@ const SearchEngine = () => {
 
   const handleToggleChange = () => {
     setEnableSharing(!enableSharing);
+    if (!enableSharing) {
+      fetchAllLocations();
+    } else {
+      setAllLocations([]);
+      setDestination('');
+    }
   };
 
   const handleSearch = async () => {
@@ -160,7 +165,6 @@ const SearchEngine = () => {
         setDestination={setDestination}
         onSearch={handleSearch}
       />
-
       <Modal show={showModal} onClose={() => setShowModal(false)}>
         <h2>Available Cars</h2>
         <div className="car-list">
@@ -171,6 +175,7 @@ const SearchEngine = () => {
                 <p>Model: {car.model}</p>
                 <p>Price: ${car.price.toFixed(2)}</p>
                 <p>Color: {car.color}</p>
+                <p>Seats: {car.seats}</p>
                 <button onClick={() => handleBooking(car)}>Book</button>
               </div>
             </div>
