@@ -3,7 +3,8 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import MainLogo from '../../Assets/main-logo.png';
 import carSearch from '../../Assets/car-check.png';
 import carSharing from '../../Assets/car-sharing.png';
-import '../../styles/Navbar.css'; 
+import '../../styles/mainUI/navbar.css';
+
 
 const originalMenuItems = [
   { title: 'Rent a Car', icon: carSearch, path: '/searchEngine' },

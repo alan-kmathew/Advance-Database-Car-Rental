@@ -3,7 +3,7 @@ import Navbar from "../components/sideBar/NavBar.jsx";
 import Passenger from "../components/Passenger/Passenger.jsx";
 import SearchEngine from "../components/searchCar/searchEngine.jsx";
 import Usecase5 from "../components/usecase5/Usecase5.jsx";
-import "../styles/Dashboard.css";
+import "../styles/mainUI/dashboard.css";
 
 import FleetMapDisplay from "../components/fleetOptimisation/FleetMapDisplay.jsx";
 import GroupBooking from "../components/groupBooking/GroupBooking.jsx";

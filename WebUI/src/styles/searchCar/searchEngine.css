@@ -79,16 +79,15 @@
   padding: 10px 15px; /* Increased padding */
   font-size: 16px; /* Adjusted font size */
   border-radius: 5px;
-  color: #fff;
-  background-color: #007bff; /* Blue background */
-  border: none;
+  color: #ffffff;
+  background-color: #3b3b3b; 
   cursor: pointer;
   text-align: center;
   transition: background-color 0.3s; /* Added transition */
 }
 
 .search-form button:hover {
-  background-color: #0056b3; /* Darker blue on hover */
+  background-color: #696868; 
 }
 
 /* Smaller toggle switch CSS */
@@ -130,7 +129,7 @@
 }
 
 input:checked + .slider {
-  background-color: #2196F3;
+  background-color: #3b3b3b;
 }
 
 input:checked + .slider:before {
