@@ -167,6 +167,56 @@ const executeMultipleCitiesShortestPathQuery = async (session, cityLists) => {
     }
 };
 
+const transferCarsBetweenStations = async (fromStationId, deliveryStations) => {
+    try {
+        const allCarIds = deliveryStations.flatMap(station => station.carListToDeliver);
+
+        const removeResult = await ServicePoint.findByIdAndUpdate(
+            fromStationId,
+            { $pull: { cars: { $in: allCarIds } } },
+            { new: true }
+        );
+
+        if (!removeResult) {
+            console.log('From station not found');
+            return { success: false, message: 'From station not found' };
+        }
+        const addResults = [];
+
+        for (const { stationId, carListToDeliver } of deliveryStations) {
+            const addResult = await ServicePoint.findByIdAndUpdate(
+                stationId,
+                { $addToSet: { cars: { $each: carListToDeliver } } },
+                { new: true }
+            );
+
+            if (!addResult) {
+                addResults.push({ success: false, stationId, message: 'Service point not found' });
+            } else {
+                addResults.push({ success: true, stationId, data: addResult });
+            }
+        }
+
+        return { success: true, removeResult, addResults };
+    } catch (error) {
+        console.error('Error transferring cars between service points:', error);
+        return { success: false, message: error.message };
+    }
+};
+
+const getCarsByServiceStationId = async serviceStationId => {
+    try {
+        const servicePoint = await ServicePoint.findById(serviceStationId)
+            .populate({
+                path: 'cars',
+            })
+            .exec();
+        return servicePoint;
+    } catch (error) {
+        logger.error('Error fetching cars by service station id:', error);
+    }
+};
+
 const executeNearestServiceStationQuery = async (session, cityName) => {
     try {
         const fetchNearestServiceStationQuery = `
@@ -195,6 +245,14 @@ const executeNearestServiceStationQuery = async (session, cityName) => {
             latitude: record.get('Latitude'),
             longitude: record.get('Longitude'),
         }));
+        for (let nearestServiceStation of nearestServiceStationResult) {
+            const serviceStation = await getCarsByServiceStationId(
+                nearestServiceStation.serviceStationID
+            );
+            nearestServiceStation.carList = serviceStation.cars;
+            nearestServiceStation.image = serviceStation.image;
+        }
+
         return nearestServiceStationResult;
     } catch (error) {
         logger.error('Error executing nerest service station query:', error);
@@ -450,5 +508,6 @@ module.exports = {
     getServiceStationWithMostBookings,
     getRideSharingCarDetails,
     executeMultipleCitiesShortestPathQuery,
-    getCoordinatesOfCity
+    getCoordinatesOfCity,
+    transferCarsBetweenStations,
 };

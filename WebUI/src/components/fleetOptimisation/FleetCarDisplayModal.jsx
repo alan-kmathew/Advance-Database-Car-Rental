@@ -1,8 +1,7 @@
-// Modal.jsx
 import React from "react";
-import "../../styles/FleetModal.css";
+import "../../styles/FleetCarDisplayModal.css";
 
-const FleetModal = ({ show, onClose, children }) => {
+const FleetCarDisplayModal = ({ show, onClose, children }) => {
   if (!show) {
     return null;
   }
@@ -25,4 +24,4 @@ const FleetModal = ({ show, onClose, children }) => {
   );
 };
 
-export default FleetModal;
+export default FleetCarDisplayModal;

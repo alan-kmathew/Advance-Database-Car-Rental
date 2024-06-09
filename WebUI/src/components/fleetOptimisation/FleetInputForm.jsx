@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import axios from "axios";
-import "../../styles/FleetForm.css";
+import "../../styles/FleetInputForm.css";
 
-const FleetOptForm = ({ setServiceStations }) => {
+const FleetInputForm = ({ setServiceStations }) => {
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
   const [stationCount, setStationCount] = useState("");
@@ -38,7 +38,7 @@ const FleetOptForm = ({ setServiceStations }) => {
 
   return (
     <form className="fleet-opt-form" onSubmit={handleSubmit}>
-      <div className="text-info">Get Highest Booking Service station</div>
+      <label>Get Highest Booking Service Stations</label>
       <div className="input-group">
         <label>From Date:</label>
         <input
@@ -58,7 +58,7 @@ const FleetOptForm = ({ setServiceStations }) => {
         />
       </div>
       <div className="input-group">
-        <label>Get Service Stations:</label>
+        <label>Number of Service Stations:</label>
         <input
           type="number"
           value={stationCount}
@@ -76,4 +76,4 @@ const FleetOptForm = ({ setServiceStations }) => {
   );
 };
 
-export default FleetOptForm;
+export default FleetInputForm;

@@ -21,6 +21,12 @@
   margin-right: 10px;
 }
 
+.legend-item .line {
+  width: 20px;
+  height: 0;
+  margin-right: 10px;
+}
+
 .legend-item span {
   font-size: 14px;
   color: #333;
