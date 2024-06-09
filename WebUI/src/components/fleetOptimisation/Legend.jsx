@@ -25,6 +25,21 @@ const Legend = () => {
         />
         <span>Nearest Locations</span>
       </div>
+      <div className="legend-item">
+        <img
+          src={require("../../Assets/nearestrouteicon.png")}
+          alt="Nearest Route Icon"
+        />
+        <span>Intermediate Shortest Location</span>
+      </div>
+      <div className="legend-item">
+        <div className="line" style={{ borderTop: "3px dashed darkred" }} />
+        <span>Nearest Station Direct Path</span>
+      </div>
+      <div className="legend-item">
+        <div className="line" style={{ borderTop: "3px dashed blue" }} />
+        <span>Shortest Path</span>
+      </div>
     </div>
   );
 };
