@@ -175,6 +175,7 @@ const SearchEngine = () => {
                 <p>Model: {car.model}</p>
                 <p>Price: ${car.price.toFixed(2)}</p>
                 <p>Color: {car.color}</p>
+                <p>Seats: {car.seats}</p>
                 <button onClick={() => handleBooking(car)}>Book</button>
               </div>
             </div>
