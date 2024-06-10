@@ -16,6 +16,7 @@ const {
     executeMultipleCitiesShortestPathQuery,
     getCoordinatesOfCity,
     transferCarsBetweenStations,
+    checkPossibleToShareTheCar
 } = require('../services/car.services');
 const dbService = require('../db/dbconfig/db');
 
@@ -28,7 +29,6 @@ router.get('/get/shortestpath', async (req, res) => {
     logger.info(`Entering ${req.baseUrl}${req.path}`);
     try {
         const validationErrors = validationResult(req);
-
         if (!validationErrors.isEmpty()) {
             const erroMessage = validationErrors.array();
             return res.status(400).json({
@@ -39,6 +39,8 @@ router.get('/get/shortestpath', async (req, res) => {
                 path: `${req.baseUrl}${req.path}`,
             });
         }
+        console.log("req.query.fromLocation---------->",req.query.fromLocation);
+        console.log("req.query.fromLocation----------->",req.query.toLocation);
         const neo4jSession = await dbService.connectNeo4j();
         const shortestPathResult = await executeShortestPathQuery(
             neo4jSession,
@@ -295,28 +297,83 @@ router.post('/get/riderdetails', async (req, res) => {
         const validationErrors = validationResult(req);
 
         if (!validationErrors.isEmpty()) {
-            const erroMessage = validationErrors.array();
+            const errorMessage = validationErrors.array();
             return res.status(400).json({
                 timestamp: new Date(),
                 status: 400,
                 error: 'Bad Request',
-                message: erroMessage,
+                message: errorMessage,
                 path: `${req.baseUrl}${req.path}`,
             });
         }
+
         const neo4jSession = await dbService.connectNeo4j();
         const nearestServiceStationResult = await executeNearestServiceStationQuery(
             neo4jSession,
             req.body.source_location
         );
-        console.log(nearestServiceStationResult);
+
         const matchedRideSharingCarDetails = await getRideSharingCarDetails(
-            req.body.source_location,
+            req.body.source_location, 
             req.body.destination_location,
             req.body.travel_date,
             nearestServiceStationResult
         );
+
+        // If the function runs successfully, return the booking details
+        return res.status(200).json({
+            timestamp: new Date(),
+            status: 200,
+            message: 'These are Available Cars to share, Please select',
+            data: matchedRideSharingCarDetails,
+            path: `${req.baseUrl}${req.path}`,
+        });
     } catch (err) {
+        // If an error occurs, log the error and return an error response
+        logger.error(err);
+        return res.status(500).json({
+            timestamp: new Date(),
+            status: 500,
+            error: 'Internal Server Error',
+            message: err.message,
+            path: `${req.baseUrl}${req.path}`,
+        });
+    }
+});
+
+router.post('/post/addPassengerDetails', async(req, res) => {
+    logger.info(`Entering ${req.baseUrl}${req.path}`);
+    try {
+        const validationErrors = validationResult(req);
+
+        if (!validationErrors.isEmpty()) {
+            const errorMessage = validationErrors.array();
+            return res.status(400).json({
+                timestamp: new Date(),
+                status: 400,
+                error: 'Bad Request',
+                message: errorMessage,
+                path: `${req.baseUrl}${req.path}`,
+            });
+        }
+        const neo4jSession = await dbService.connectNeo4j();
+
+        const { source_location, destination_location, travel_date, carId } = req.body;
+        const getServiceStationList = await executeNearestServiceStationQuery(
+            neo4jSession,
+            source_location
+        );
+        const matchedRideSharingCarDetails = await checkPossibleToShareTheCar(
+            neo4jSession,
+            source_location,
+            destination_location,
+            travel_date,
+            carId
+        );
+
+        return res.status(200).json(matchedRideSharingCarDetails);
+    } catch (err) {
+        // If an error occurs, log the error and return an error response
         logger.error(err);
         return res.status(500).json({
             timestamp: new Date(),
@@ -533,5 +590,6 @@ router.get('/get/nearest/serviceStationDetailed', async (req, res) => {
         });
     }
 });
+
 
 module.exports = router;
