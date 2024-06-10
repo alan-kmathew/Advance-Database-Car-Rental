@@ -34,10 +34,11 @@ const BookingsSchema = new mongoose.Schema({
         email: { type: String, required: true },
     },
     price: { type: Number, required: true },
-    servicePointId: { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'ServicePoint' },
+    servicePointId: { type: mongoose.Schema.Types.ObjectId, required: false, ref: 'ServicePoint' },
     type: { type: String, required: true },
     bookingDate: { type: Date, required: true },
-    destination: { type: String, required: false }
+    destination: { type: String, required: false },
+    source_location: { type: String, required: false, default: null }
 });
 
 const BookingsModel = mongoose.model('Bookings', BookingsSchema);

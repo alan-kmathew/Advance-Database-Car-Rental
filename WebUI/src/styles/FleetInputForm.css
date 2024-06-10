@@ -13,6 +13,11 @@
   width: 300px;
 }
 
+.fleet-opt-form label {
+  font-size: 18px;
+  padding: 2px;
+}
+
 .fleet-opt-form .input-group {
   margin-bottom: 15px;
   position: relative;
@@ -21,7 +26,7 @@
 .fleet-opt-form .input-group label {
   display: block;
   margin-bottom: 5px;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: normal;
   color: #333;
 }
@@ -44,9 +49,22 @@
   color: #333;
 }
 
+.fleet-opt-form .input-group input[type="number"] {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+  font-size: 14px;
+  color: #999;
+  background-color: #fff;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
 .fleet-opt-form .input-group::after {
   display: none;
-  
 }
 
 .fleet-opt-form .text-info {
