@@ -40,8 +40,8 @@ router.get('/get/shortestpath', async (req, res) => {
                 path: `${req.baseUrl}${req.path}`,
             });
         }
-        console.log("req.query.fromLocation---------->",req.query.fromLocation);
-        console.log("req.query.fromLocation----------->",req.query.toLocation);
+        console.log('req.query.fromLocation---------->', req.query.fromLocation);
+        console.log('req.query.fromLocation----------->', req.query.toLocation);
         const neo4jSession = await dbService.connectNeo4j();
         const shortestPathResult = await executeShortestPathQuery(
             neo4jSession,
@@ -317,7 +317,7 @@ router.post('/get/riderdetails', async (req, res) => {
             req.body.source_location
         );
         const matchedRideSharingCarDetails = await getRideSharingCarDetails(
-            req.body.source_location, 
+            req.body.source_location,
             req.body.destination_location,
             req.body.travel_date,
             nearestServiceStationResult
@@ -344,10 +344,8 @@ router.post('/get/riderdetails', async (req, res) => {
     }
 });
 
-/**
- * Save Passenger details
- */
-router.post('/post/addPassengerDetails', async(req, res) => {
+router.post('/post/addPassengerDetails', async (req, res) => {
+
     logger.info(`Entering ${req.baseUrl}${req.path}`);
     try {
         const validationErrors = validationResult(req);
@@ -680,6 +678,5 @@ router.get('/get/nearest/serviceStationDetailed', async (req, res) => {
         });
     }
 });
-
 
 module.exports = router;

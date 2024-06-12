@@ -6,7 +6,7 @@ const { faker } = require('@faker-js/faker');
 const axios = require('axios'); // Import axios
 
 const executeShortestPathQuery = async (session, fromLocation, toLocation) => {
-    console.log("inside executeShortestPathQuery");
+    console.log('inside executeShortestPathQuery');
     try {
         const createGraphQuery = `
             CALL gds.graph.exists('germanCitiesGraph') YIELD exists
@@ -55,7 +55,7 @@ const executeShortestPathQuery = async (session, fromLocation, toLocation) => {
 
         const result = await session.run(dijkstraQuery, {
             fromLocation,
-            toLocation
+            toLocation,
         });
 
         const shortestPathResult = result.records.map(record => ({
@@ -69,8 +69,158 @@ const executeShortestPathQuery = async (session, fromLocation, toLocation) => {
 
         return shortestPathResult;
     } catch (error) {
-        console.error('Error executing query:', error);
-        throw error;
+        logger.error('Error executing query:', error);
+    }
+};
+
+const executeMultipleCitiesShortestPathQuery = async (session, cityLists) => {
+    try {
+        const createGraphQuery = `
+        CALL gds.graph.exists('germanCitiesGraph') YIELD exists
+        WITH exists
+        WHERE NOT exists 
+        CALL gds.graph.project(
+            'germanCitiesGraph',
+            'City',
+            {
+                DISTANCE: {
+                    type: 'Distance',
+                    properties: 'miles',
+                    orientation: 'UNDIRECTED'
+                }
+            }
+        )
+        YIELD graphName, nodeCount, relationshipCount
+        RETURN graphName, nodeCount, relationshipCount;
+      `;
+
+        const travellingSalesManQueryQuery = `
+        WITH $cityLists as cityNames 
+        MATCH (c:City)
+        WHERE c.name in cityNames
+        WITH collect(c) as cities
+        with cities, head([c in cities WHERE c.name = $cityLists[0]]) as startCity
+        UNWIND cities as c1
+        WITH startCity,c1, [c IN cities WHERE id(c) > id(c1)] AS c2s, cities
+        UNWIND c2s AS c2
+        CALL gds.shortestPath.dijkstra.stream('germanCitiesGraph',{
+        sourceNode: id(c1),
+        targetNode: id(c2),
+        relationshipWeightProperty: "miles"
+        }) YIELD nodeIds, totalCost
+        WITH c1, c2, totalCost, nodeIds as shortestHopNodeIds, cities, startCity
+        MERGE (c1)-[r:SHORTEST_ROUTE_TO]->(c2)
+        SET r.cost = totalCost, r.shortestHopNodeIds = shortestHopNodeIds
+ 
+        WITH startCity, c1, c2, cities, (size(cities) - 1) as level
+        CALL apoc.path.expandConfig(
+        startCity, 
+        { relationshipFilter: 'SHORTEST_ROUTE_TO', 
+            minLevel: level, 
+            maxLevel: level, 
+            whitelistNodes: cities, 
+            terminatorNodes: [c2], 
+            uniqueness: 'NODE_PATH' }
+        ) 
+        YIELD path 
+        WITH nodes(path) as orderedCities,
+            [n IN nodes(path) | id(n)] AS ids,
+            reduce(cost = 0, x in relationships(path) | cost + x.cost) as totalDistanceToCover,
+            [r IN relationships(path) | r.shortestHopNodeIds] AS shortestRouteNodeIds
+        ORDER BY totalDistanceToCover LIMIT 1 
+ 
+        UNWIND range(0, size(orderedCities) - 1) as index 
+        WITH orderedCities, totalDistanceToCover, index, ids, 
+            shortestRouteNodeIds[index] as currentShortestRouteNodeIds,
+            ids[index] as currentId
+        WITH orderedCities, totalDistanceToCover, 
+            CASE 
+            WHEN size(currentShortestRouteNodeIds) > 0 AND currentShortestRouteNodeIds[0] = currentId
+            THEN [n IN currentShortestRouteNodeIds | n]
+            ELSE reverse([n IN currentShortestRouteNodeIds | n])
+            END as orderedHopNodeIds 
+        WITH distinct orderedHopNodeIds, orderedCities, totalDistanceToCover
+        UNWIND orderedHopNodeIds as orderedHopNodeId 
+        MATCH (c: City) WHERE id(c) = orderedHopNodeId
+        RETURN 
+        [c IN orderedCities | c.name] as cityNames,
+        [city in collect(distinct c) |{
+        cityname: city.name,
+        latitude: city.latitude,
+        longitude:city.longitude
+        }] as routeDetails,
+        totalDistanceToCover
+        LIMIT 1;
+      `;
+
+        const deleteGraphQuery = `
+        CALL gds.graph.drop('germanCitiesGraph') YIELD graphName;
+      `;
+
+        await session.run(createGraphQuery);
+
+        const result = await session.run(travellingSalesManQueryQuery, { cityLists });
+        const multipleCityshortestPathResult = result.records.map(record => ({
+            routeDetails: record.get('routeDetails'),
+            totalDistanceInMiles: record.get('totalDistanceToCover'),
+            cityNames: record.get('cityNames'),
+        }));
+
+        await session.run(deleteGraphQuery);
+
+        return multipleCityshortestPathResult;
+    } catch (error) {
+        logger.error('Error executing travelling salesman query:', error);
+    }
+};
+
+const transferCarsBetweenStations = async (fromStationId, deliveryStations) => {
+    try {
+        const allCarIds = deliveryStations.flatMap(station => station.carListToDeliver);
+
+        const removeResult = await ServicePoint.findByIdAndUpdate(
+            fromStationId,
+            { $pull: { cars: { $in: allCarIds } } },
+            { new: true }
+        );
+
+        if (!removeResult) {
+            console.log('From station not found');
+            return { success: false, message: 'From station not found' };
+        }
+        const addResults = [];
+
+        for (const { stationId, carListToDeliver } of deliveryStations) {
+            const addResult = await ServicePoint.findByIdAndUpdate(
+                stationId,
+                { $addToSet: { cars: { $each: carListToDeliver } } },
+                { new: true }
+            );
+
+            if (!addResult) {
+                addResults.push({ success: false, stationId, message: 'Service point not found' });
+            } else {
+                addResults.push({ success: true, stationId, data: addResult });
+            }
+        }
+
+        return { success: true, removeResult, addResults };
+    } catch (error) {
+        console.error('Error transferring cars between service points:', error);
+        return { success: false, message: error.message };
+    }
+};
+
+const getCarsByServiceStationId = async serviceStationId => {
+    try {
+        const servicePoint = await ServicePoint.findById(serviceStationId)
+            .populate({
+                path: 'cars',
+            })
+            .exec();
+        return servicePoint;
+    } catch (error) {
+        logger.error('Error fetching cars by service station id:', error);
     }
 };
 
@@ -554,43 +704,22 @@ const getCoordinatesOfCity = async (session, cityName) => {
     }
 };
 
-const findMostSuitableNearestServiceStation = async (bookings, serviceStations) => {
-    const serviceStationMap = serviceStations.reduce((map, station) => {
-        map[station.serviceStationID] = station;
-        return map;
-    }, {});
-
-    let nearestBooking = null;
-    let shortestDistance = Infinity;
-
-    bookings.forEach(booking => {
-        const servicePointId = booking.servicePointId.toString(); // Convert ObjectId to string
-        const serviceStation = serviceStationMap[servicePointId];
-
-        if (serviceStation && serviceStation.distanceInMiles < shortestDistance) {
-            nearestBooking = booking;
-            shortestDistance = serviceStation.distanceInMiles;
-        }
-    });
-
-    return nearestBooking;
-};
-
 const insertBooking = async (payload, session) => {
     const newBooking = await BookingsModel.create([payload], { session });
     return newBooking;
 };
 
 const updateCarSeats = async (carId, session) => {
-    await Car.updateOne(
-        { _id: carId },
-        { $inc: { seats: -1 } },
-        { session }
-    );
+    await Car.updateOne({ _id: carId }, { $inc: { seats: -1 } }, { session });
 };
 
-
-const checkPossibleToShareTheCar = async (neo4jSession, source_location, destination_location, travel_date, carId) => {
+const checkPossibleToShareTheCar = async (
+    neo4jSession,
+    source_location,
+    destination_location,
+    travel_date,
+    carId
+) => {
     if (!source_location || !destination_location || !travel_date) {
         throw new Error('All fields are required');
     }
@@ -604,11 +733,11 @@ const checkPossibleToShareTheCar = async (neo4jSession, source_location, destina
     
     try {
         const carBooking = await BookingsModel.findOne({
-            type: "sharing",
+            type: 'sharing',
             destination: destination_location,
-            carId: new mongoose.Types.ObjectId(carId)
+            carId: new mongoose.Types.ObjectId(carId),
         }).exec();
-        
+
         if (!carBooking) {
             throw new Error('Car booking not found');
         }
@@ -626,21 +755,24 @@ const checkPossibleToShareTheCar = async (neo4jSession, source_location, destina
         }
         // const source_location_cords = await getCoordinatesForLocation(serviceStationName);
         // const destination_location_cords = await getCoordinatesForLocation(carBooking.destination);
-        console.log("serviceStationName----------_>",serviceStationName);
-        console.log("carBooking.destination------------------>",carBooking.destination);
+        console.log('serviceStationName----------_>', serviceStationName);
+        console.log('carBooking.destination------------------>', carBooking.destination);
         // Fetch the route using the provided API
-        const apiUrl = `http://localhost:8020/api/car/get/shortestpath?fromLocation=${encodeURIComponent(serviceStationName)}&toLocation=${encodeURIComponent(carBooking.destination)}`;
-        console.log("apiUrl-------------->",apiUrl);
+        const apiUrl = `http://localhost:8020/api/car/get/shortestpath?fromLocation=${encodeURIComponent(
+            serviceStationName
+        )}&toLocation=${encodeURIComponent(carBooking.destination)}`;
+        console.log('apiUrl-------------->', apiUrl);
         const routeResponse = await axios.get(apiUrl);
         const route = routeResponse.data[0];
-        console.log("route----------------->", route.routeDetails);
+        console.log('route----------------->', route.routeDetails);
 
         const passenger_source_cords = await getCoordinatesForLocation(source_location);
+
 
         // Parse the passenger location
         const passengerLocation = {
             lat: passenger_source_cords.lat,
-            lng: passenger_source_cords.lon
+            lng: passenger_source_cords.lon,
         };
 
         // Check if the passenger's location is on the route
@@ -654,14 +786,14 @@ const checkPossibleToShareTheCar = async (neo4jSession, source_location, destina
             endDate: travelDate.toDate(),
             customer: {
                 name: randomName,
-                email: randomEmail
+                email: randomEmail,
             },
             price: 0, // Assuming price logic to be added
             servicePointId: carBooking.servicePointId,
-            type: "passenger",
+            type: 'passenger',
             bookingDate: new Date(),
             destination: destination_location,
-            source_location: source_location
+            source_location: source_location,
         };
 
         const session = await mongoose.startSession();
@@ -679,13 +811,11 @@ const checkPossibleToShareTheCar = async (neo4jSession, source_location, destina
             session.endSession();
 
             return { message: 'Booking successful', booking: newBooking };
-
         } catch (transactionError) {
             await session.abortTransaction();
             session.endSession();
             throw transactionError;
         }
-
     } catch (error) {
         console.error('Error fetching ride sharing car details:', error);
         throw error;
@@ -694,7 +824,9 @@ const checkPossibleToShareTheCar = async (neo4jSession, source_location, destina
 
 const fetchRoute = async (start, end) => {
     const apiKey = 'GJ9cH5kbfx3i5WfUALY8huGPqfwOlxN0';
-    const response = await fetch(`https://api.tomtom.com/routing/1/calculateRoute/${start.lat},${start.lon}:${end.lat},${end.lon}/json?key=${apiKey}&routeType=fastest`);
+    const response = await fetch(
+        `https://api.tomtom.com/routing/1/calculateRoute/${start.lat},${start.lon}:${end.lat},${end.lon}/json?key=${apiKey}&routeType=fastest`
+    );
     const data = await response.json();
 
     if (!data.routes || data.routes.length === 0) {
@@ -715,14 +847,14 @@ const fetchRoute = async (start, end) => {
 
     return leg.points.map(point => ({
         lat: point.latitude,
-        lng: point.longitude
+        lng: point.longitude,
     }));
 };
 
 const haversine = (location1, location2) => {
-    const toRad = (x) => (x * Math.PI) / 180;
+    const toRad = x => (x * Math.PI) / 180;
     const R = 6371; // Earth's radius in kilometers
-    console.log("location1------------->",location1,location2);
+    console.log('location1------------->', location1, location2);
     const lat1 = location1.lat;
     const lon1 = location1.lng;
     const lat2 = location2.latitude;
@@ -733,16 +865,15 @@ const haversine = (location1, location2) => {
 
     const a =
         Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-        Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
-        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
 
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c; // Distance in kilometers
 };
 
 const isPassengerOnRoute = (passengerLocation, route, maxDistance = 25.0) => {
-    console.log
-    console.log("route------------>",route);
+    console.log;
+    console.log('route------------>', route);
     for (const waypoint of route) {
         const distance = haversine(passengerLocation, waypoint);
         if (distance <= maxDistance) {
@@ -754,7 +885,9 @@ const isPassengerOnRoute = (passengerLocation, route, maxDistance = 25.0) => {
 
 async function getCoordinatesForLocation(locationName) {
     const TOMTOM_API_KEY = 'GJ9cH5kbfx3i5WfUALY8huGPqfwOlxN0';
-    const url = `https://api.tomtom.com/search/2/geocode/${encodeURIComponent(locationName)}.json?key=${TOMTOM_API_KEY}`;
+    const url = `https://api.tomtom.com/search/2/geocode/${encodeURIComponent(
+        locationName
+    )}.json?key=${TOMTOM_API_KEY}`;
     const response = await axios.get(url);
     if (response.data.results.length > 0) {
         return response.data.results[0].position;
@@ -844,5 +977,7 @@ module.exports = {
     transferCarsBetweenStations,
     findMostSuitableNearestServiceStation,
     checkPossibleToShareTheCar,
-    fetchPassengerBookings
+    fetchPassengerBookings,
+    fetchRoute,
+    transferCarsBetweenStations,
 };
