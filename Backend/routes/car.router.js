@@ -17,9 +17,10 @@ const {
     getCoordinatesOfCity,
     transferCarsBetweenStations,
     checkPossibleToShareTheCar,
+    fetchPassengerBookings
 } = require('../services/car.services');
 const dbService = require('../db/dbconfig/db');
-
+const axios = require('axios'); 
 const router = new Router();
 
 /**
@@ -291,6 +292,9 @@ router.get('/get/carRental', async (req, res) => {
     }
 });
 
+/**
+ * get details for ride sharer and display in the passenger screen
+ */
 router.post('/get/riderdetails', async (req, res) => {
     logger.info(`Entering ${req.baseUrl}${req.path}`);
     try {
@@ -312,7 +316,6 @@ router.post('/get/riderdetails', async (req, res) => {
             neo4jSession,
             req.body.source_location
         );
-
         const matchedRideSharingCarDetails = await getRideSharingCarDetails(
             req.body.source_location,
             req.body.destination_location,
@@ -342,6 +345,7 @@ router.post('/get/riderdetails', async (req, res) => {
 });
 
 router.post('/post/addPassengerDetails', async (req, res) => {
+
     logger.info(`Entering ${req.baseUrl}${req.path}`);
     try {
         const validationErrors = validationResult(req);
@@ -359,10 +363,7 @@ router.post('/post/addPassengerDetails', async (req, res) => {
         const neo4jSession = await dbService.connectNeo4j();
 
         const { source_location, destination_location, travel_date, carId } = req.body;
-        const getServiceStationList = await executeNearestServiceStationQuery(
-            neo4jSession,
-            source_location
-        );
+       
         const matchedRideSharingCarDetails = await checkPossibleToShareTheCar(
             neo4jSession,
             source_location,
@@ -384,6 +385,93 @@ router.post('/post/addPassengerDetails', async (req, res) => {
         });
     }
 });
+
+router.post('/get/passengerRouteDetails', async (req, res) => {
+    logger.info(`Entering ${req.baseUrl}${req.path}`);
+    try {
+        const validationErrors = validationResult(req);
+
+        if (!validationErrors.isEmpty()) {
+            const errorMessage = validationErrors.array();
+            return res.status(400).json({
+                timestamp: new Date(),
+                status: 400,
+                error: 'Bad Request',
+                message: errorMessage,
+                path: `${req.baseUrl}${req.path}`,
+            });
+        }
+
+        const { from_date, to_date ,source_location_id, destination_location} = req.body;
+        const passengerBookingData = await fetchPassengerBookings(from_date, to_date, source_location_id, destination_location);
+
+        // Prepare the request body for the shortest path API
+        const cityLists = [
+            passengerBookingData.serviceStationName,
+            ...passengerBookingData.passengerData.map(data => data.source_location),
+            passengerBookingData.destination
+        ];
+
+        const requestBody = { cityLists: cityLists };
+
+        // Pass the response to the shortest path API and capture the response
+        const shortestPathResponse = await axios.post('http://localhost:8020/api/car/shortestPath', requestBody);
+        console.log("shortestPathResponse----totalDistanceInMiles-------->",shortestPathResponse.data[0].totalDistanceInMiles);
+        // Extract the response data    
+        const routeDetails = shortestPathResponse.data[0].routeDetails;
+        const cityNames = shortestPathResponse.data[0].cityNames;
+
+        // Structure the final response
+        const formattedCityNames = cityNames.map((cityName, index) => {
+            const type = index === 0 ? 'serviceStation' : (index === cityNames.length - 1 ? 'destination' : 'passenger');
+            let longitude = null;
+            let latitude = null;
+        
+            // Find the route detail for the current city name
+            const routeDetail = routeDetails.find(route => route.cityname === cityName);
+            if (routeDetail) {
+                longitude = routeDetail.longitude;
+                latitude = routeDetail.latitude;
+            }
+        
+            const name = type === 'passenger' ? passengerBookingData.passengerData[index - 1].name : "";
+            const locationName = cityName;
+        
+            return {
+                name: name,
+                type: type,
+                locationName: locationName,
+                longitude: longitude,
+                latitude: latitude
+            };
+        });
+
+        console.log("formattedCityNames--------->",formattedCityNames);
+
+        // // Return the structured response
+        return res.status(200).json({
+            timestamp: new Date(),
+            status: 200,
+            message: 'Passenger details and shortest path fetched successfully',
+            data: {
+                routeDetails: routeDetails,
+                passengerDetails: formattedCityNames,
+                totalDistanceInMiles: shortestPathResponse.data[0].totalDistanceInMiles
+            },
+            path: `${req.baseUrl}${req.path}`,
+        });
+    } catch (err) {
+        logger.error(err);
+        return res.status(500).json({
+            timestamp: new Date(),
+            status: 500,
+            error: 'Internal Server Error',
+            message: err.message,
+            path: `${req.baseUrl}${req.path}`,
+        });
+    }
+});
+
 
 /**
  * Get all service points

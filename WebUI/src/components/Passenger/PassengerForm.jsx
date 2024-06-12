@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import '../../styles/passenger.css';
 
-const PassengerForm = () => {
+const PassengerForm = ({ onSearch }) => {
   const [formData, setFormData] = useState({
     source: '',
     destination: '',
@@ -31,8 +31,11 @@ const PassengerForm = () => {
     e.preventDefault();
     const validationErrors = validate();
     if (Object.keys(validationErrors).length === 0) {
-      console.log('Form submitted', formData);
-      // Handle form submission logic here
+      onSearch({
+        source_location: formData.source,
+        destination_location: formData.destination,
+        travel_date: formData.fromDate,
+      });
     } else {
       setErrors(validationErrors);
     }
@@ -63,7 +66,7 @@ const PassengerForm = () => {
         {errors.destination && <span className="error">{errors.destination}</span>}
       </div>
       <div className="form-group">
-        <label htmlFor="fromDate">Travel Date</label>
+        <label htmlFor="fromDate">Travel Date:</label>
         <input
           type="date"
           id="fromDate"
@@ -73,8 +76,7 @@ const PassengerForm = () => {
         />
         {errors.fromDate && <span className="error">{errors.fromDate}</span>}
       </div>
-     
-      <button type="submit" className="btn btn-primary">Submit</button>
+      <button type="submit" className="btn btn-primary">Search</button>
     </form>
   );
 };
