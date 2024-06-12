@@ -73,7 +73,7 @@ input[type="date"]:valid {
   height: 30px;
   border: 1px solid #1388fc;
   margin: 10px 0;
-  background: #7cbeff;
+  background: #1388fc;
   border-radius: 6px;
   color: #fff;
 }
@@ -83,7 +83,7 @@ input[type="date"]:valid {
 
 .submitButton {
   height: 50px;
-  background: #5cadff;
+  background: #1388fc;
   border: 1px solid #1388fc;
   border-radius: 6px;
   color: #fff;
