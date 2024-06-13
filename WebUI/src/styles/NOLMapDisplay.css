@@ -1,0 +1,42 @@
+.fleet-opt-container {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+}
+
+@keyframes jump {
+  0% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+.highlighted-icon .inner-icon {
+  animation: jump 1s infinite;
+}
+
+.popup img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 5px;
+  margin-bottom: 5px;
+}
+
+.close-popup-btn {
+  position: absolute;
+  top: 3px;
+  right: 5px;
+  background: none;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.leaflet-popup-content {
+  height: fit-content;
+}
