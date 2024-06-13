@@ -3,7 +3,7 @@ import Navbar from "../components/sideBar/NavBar.jsx";
 import Passenger from "../components/Passenger/Passenger.jsx";
 import GetDirections from "../components/Direction/Direction.jsx";
 import SearchEngine from "../components/searchCar/searchEngine.jsx";
-import Usecase5 from "../components/usecase5/Usecase5.jsx";
+import NOLMapDisplay from "../components/NewOptimalLocation/NOLMapDisplay.jsx";
 import "../styles/mainUI/dashboard.css";
 
 import FleetMapDisplay from "../components/fleetOptimisation/FleetMapDisplay.jsx";
@@ -22,7 +22,7 @@ function Dashboard() {
             <Route path="/getDirections" element={<GetDirections />} />
             <Route path="/eventBooking" element={<GroupBooking />} />
             <Route path="/fleetopt" element={<FleetMapDisplay />} />
-            <Route path="/usecase5" element={<Usecase5 />} />
+            <Route path="/NewOptimalLocation" element={<NOLMapDisplay />} />
           </Routes>
         </div>
       </div>

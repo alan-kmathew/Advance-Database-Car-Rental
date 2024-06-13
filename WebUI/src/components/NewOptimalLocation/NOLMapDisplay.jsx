@@ -3,11 +3,11 @@ import axios from "axios";
 import NOLInputForm from "./NOLInputForm";
 
 import Legend from "./Legend";
-import "../../styles/FleetMapDisplay.css";
-import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
+import "../../styles/NOLMapDisplay.css";
+import { MapContainer, TileLayer, Marker, Popup, } from "react-leaflet";
 import L from "leaflet";
 import "leaflet-curve";
-import NOLFleetCarDisplayModal from "./NOLFleetCarDisplayModal";
+
 
 const ServicePointIcon = L.divIcon({
   className: "custom-icon",
@@ -28,7 +28,7 @@ const ServicePointIconHighlighted = L.divIcon({
 });
 
 
-function FleetMapDisplay() {
+function NOLMapDisplay() {
   const [serviceStations, setServiceStations] = useState([]);
   const [allServicePoints, setAllServicePoints] = useState([]);
   const [totalDistance, setTotalDistance] = useState(0);
@@ -163,14 +163,7 @@ function FleetMapDisplay() {
 
         <Legend />
        
-        {selectedStation && (
-          <NOLFleetCarDisplayModal
-            show={showModal}
-            onClose={() => setShowModal(false)}
-          > 
-           
-          </NOLFleetCarDisplayModal>
-        )}
+        
 
     
       </MapContainer>
@@ -178,4 +171,4 @@ function FleetMapDisplay() {
   );
 }
 
-export default FleetMapDisplay;
+export default NOLMapDisplay;
