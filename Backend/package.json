@@ -5,7 +5,7 @@
   "main": "server.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/ACS-2023-25/advance-database-car-rental.git"
+    "url": "git+https://github.com/ACS-2023-25/advance-database-car-rental.git"
   },
   "scripts": {
     "dev": "nodemon -r dotenv/config server.js dotenv_config_path=./config/development.env",
@@ -16,7 +16,7 @@
     "prettier:format": "prettier -w '**/*.{js,json}'"
   },
   "author": "",
-  "license": "",
+  "license": "ISC",
   "dependencies": {
     "@faker-js/faker": "^8.4.1",
     "amqplib": "^0.10.0",
@@ -101,5 +101,10 @@
       "ecmaVersion": "latest"
     },
     "rules": {}
-  }
+  },
+  "bugs": {
+    "url": "https://github.com/ACS-2023-25/advance-database-car-rental/issues"
+  },
+  "homepage": "https://github.com/ACS-2023-25/advance-database-car-rental#readme",
+  "keywords": []
 }

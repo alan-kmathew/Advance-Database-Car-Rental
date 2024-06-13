@@ -15,7 +15,7 @@ const originalMenuItems = [
 const newMenuItems = [
   { title: 'Book an Event', icon: carSearch, path: '/eventBooking' },
   { title: 'Fleet Optimisation', icon: carSharing, path: '/fleetOpt' },
-  { title: 'Use Case 5', icon: carSearch, path: '/usecase5' },
+  { title: 'New Optimal Service Station', icon: carSearch, path: '/usecase5' },
 ];
 
 function Navbar() {

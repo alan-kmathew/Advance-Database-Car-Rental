@@ -49,6 +49,11 @@
             "date": 1718001667749,
             "name": "logs/example-service-2024-06-10.log",
             "hash": "41b28dc2eb60e8ff742f15b205904515e5814d245ed0cd233bd5066a9c721548"
+        },
+        {
+            "date": 1718288750220,
+            "name": "logs\\example-service-2024-06-13.log",
+            "hash": "6e7ab818627d124aa5801c97d9995395b9fc094e107ee98e7cc72caaf60bc5b9"
         }
     ],
     "hashType": "sha256"
