@@ -1,16 +1,17 @@
+
 import {
   MapContainer,
   Marker,
   Polyline,
   Popup,
   TileLayer,
-  Tooltip,
 } from "react-leaflet";
 import "./GroupBooking.css";
 import GroupBookingForm from "./Form/GroupBookingForm";
 import { useState } from "react";
 import PlanView from "./PlanView/PlanView";
 import { Icon } from "leaflet";
+import IconLegend from "./IconLegend/IconLegend";
 
 const destIcon = new Icon({
   iconUrl: require("../../Assets/userLocation.png"),
@@ -38,7 +39,6 @@ const GroupBooking = () => {
           userCity: index,
           userLocation: userLocation,
           name: ss.name,
-          
         });
       });
     });
@@ -49,11 +49,8 @@ const GroupBooking = () => {
   const visibleLineOptions = { color: "#6927F3" };
   const hiddenLineOptions = { color: "#ffffff00" };
 
-
-  
-
   return (
-    <>
+    <div className="map-container">
       {isPlanView ? (
         <PlanView
           plan={plan}
@@ -76,58 +73,55 @@ const GroupBooking = () => {
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        {
-          // markers for the service stations for each requirement
-          ssLocations.map((ssLocation, index) => {
-            console.log(ssLocation);
-            return (
-              <>
-                <Marker
-                  key={`ssLoc${index}`}
-                  icon={serviceStationIcon}
-                  position={ssLocation.location}
-                  opacity={ssLocation.userCity == showSsLocationsCity ? 1 : 0}
-                  eventHandlers={{
-                    click: (e) => {
-                      e.target.openPopup();
-                    },
-                  }}
-                >
-                  <Popup className="request-popup">{ssLocation.name}</Popup>
-                </Marker>
-
-                <Polyline
-                  key={`ssLocLine${index}`}
-                  positions={[ssLocation.location, ssLocation.userLocation]}
-                  pathOptions={
-                    ssLocation.userCity == showSsLocationsCity
-                      ? visibleLineOptions
-                      : hiddenLineOptions
-                  }
-                />
-              </>
-            );
-          })
-        }
-        {
-          // markers for the user cities
-          Object.entries(plan).map((planItem, index) => {
-            return (
+        {ssLocations.map((ssLocation, index) => {
+          console.log(ssLocation);
+          return (
+            <>
               <Marker
-                key={`city${index}`}
-                icon={destIcon}
-                position={[planItem[1].location.lat, planItem[1].location.lon]}
+                key={`ssLoc${index}`}
+                icon={serviceStationIcon}
+                position={ssLocation.location}
+                opacity={ssLocation.userCity == showSsLocationsCity ? 1 : 0}
                 eventHandlers={{
                   click: (e) => {
-                    setShowSsLocationsCity(index);
+                    e.target.openPopup();
                   },
                 }}
-              ></Marker>
-            );
-          })
-        }
+              >
+                <Popup className="request-popup">{ssLocation.name}</Popup>
+              </Marker>
+
+              <Polyline
+                key={`ssLocLine${index}`}
+                positions={[ssLocation.location, ssLocation.userLocation]}
+                pathOptions={
+                  ssLocation.userCity == showSsLocationsCity
+                    ? visibleLineOptions
+                    : hiddenLineOptions
+                }
+              />
+            </>
+          );
+        })}
+        {Object.entries(plan).map((planItem, index) => {
+          return (
+            <Marker
+              key={`city${index}`}
+              icon={destIcon}
+              position={[planItem[1].location.lat, planItem[1].location.lon]}
+              eventHandlers={{
+                click: (e) => {
+                  setShowSsLocationsCity(index);
+                },
+              }}
+            ></Marker>
+          );
+        })}
       </MapContainer>
-    </>
+      <div className="legend-container">
+        <IconLegend />
+      </div>
+    </div>
   );
 };
 
