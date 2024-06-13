@@ -825,7 +825,6 @@ module.exports = {
     executeMultipleCitiesShortestPathQuery,
     getCoordinatesOfCity,
     transferCarsBetweenStations,
-    findMostSuitableNearestServiceStation,
     checkPossibleToShareTheCar,
     fetchPassengerBookings,
     fetchRoute,
