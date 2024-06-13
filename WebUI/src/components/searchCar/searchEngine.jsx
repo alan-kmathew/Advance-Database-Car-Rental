@@ -16,7 +16,6 @@ const SearchEngine = () => {
   const [destination, setDestination] = useState("");
   const [cars, setCars] = useState([]);
   const [showModal, setShowModal] = useState(false);
-  const [routeDetails, setRouteDetails] = useState(null); // State to store route details
 
   const fetchLocations = async () => {
     try {
@@ -74,49 +73,25 @@ const SearchEngine = () => {
   };
 
   const handleSearch = async () => {
-    if (!selectedLocation || !fromDate || !toDate || (enableSharing && !destination)) {
+    if (
+      !selectedLocation ||
+      !fromDate ||
+      !toDate ||
+      (enableSharing && !destination)
+    ) {
       Swal.fire("Error", "Please fill all required fields.", "error");
       return;
     }
-  
+
     try {
-      let response;
-      if (enableSharing) {
-        // Hit the passenger route details API
-        try {
-          response = await axios.post(
-            "http://localhost:8020/api/car/get/passengerRouteDetails",
-            {
-              from_date: fromDate,
-              to_date: toDate,
-              source_location_id: selectedLocation.id,
-              destination_location: destination
-            }
-          );
-          // Check if passenger bookings are found
-          if (response.data.status === 200 && response.data.message === "Passenger details and shortest path fetched successfully") {
-            // If passenger bookings found, update route details state
-            setRouteDetails(response.data.data);
-          } else if (response.data.message === "No passenger bookings found for the given criteria") {
-            // If no passenger bookings found, show error message
-            Swal.fire("Error", "No passenger bookings found for the given criteria", "error");
-            return;
-          }
-        } catch (error) {
-          Swal.fire("Error", "Error fetching passenger route details.", "error");
-          console.error("Error fetching passenger route details:", error);
-        }
-      } else {
-        // If enableSharing is false, proceed to fetch car rentals directly
-        response = await axios.get(
-          `http://localhost:8020/api/car/get/carRental?fromLocation=${selectedLocation.id}&startDate=${fromDate}&endDate=${toDate}`
-        );
-        setCars(response.data);
-        setShowModal(true);
-      }
+      const response = await axios.get(
+        `http://localhost:8020/api/car/get/carRental?fromLocation=${selectedLocation.id}&startDate=${fromDate}&endDate=${toDate}`
+      );
+      setCars(response.data);
+      setShowModal(true);
     } catch (error) {
-      Swal.fire("Error", "Error fetching data.", "error");
-      console.error("Error fetching data:", error);
+      Swal.fire("Error", "Error fetching car rental data.", "error");
+      console.error("Error fetching car rental data:", error);
     }
   };
 
@@ -175,7 +150,6 @@ const SearchEngine = () => {
         destination={destination}
         enableSharing={enableSharing}
         onSearch={handleSearch}
-        routeDetails={routeDetails} // Pass route details to MapWrapper
       />
       <FormComponent
         locations={locations}
@@ -201,7 +175,6 @@ const SearchEngine = () => {
                 <p>Model: {car.model}</p>
                 <p>Price: ${car.price.toFixed(2)}</p>
                 <p>Color: {car.color}</p>
-                <p>Seats: {car.seats}</p>
                 <button onClick={() => handleBooking(car)}>Book</button>
               </div>
             </div>
