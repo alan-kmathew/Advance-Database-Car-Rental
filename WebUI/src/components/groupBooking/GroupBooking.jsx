@@ -37,6 +37,8 @@ const GroupBooking = () => {
           location: [ss.location.lat, ss.location.lon],
           userCity: index,
           userLocation: userLocation,
+          name: ss.name,
+          
         });
       });
     });
@@ -46,6 +48,9 @@ const GroupBooking = () => {
   const [isPlanView, setIsPlanView] = useState(false);
   const visibleLineOptions = { color: "#6927F3" };
   const hiddenLineOptions = { color: "#ffffff00" };
+
+
+  
 
   return (
     <>
@@ -82,7 +87,15 @@ const GroupBooking = () => {
                   icon={serviceStationIcon}
                   position={ssLocation.location}
                   opacity={ssLocation.userCity == showSsLocationsCity ? 1 : 0}
-                ></Marker>
+                  eventHandlers={{
+                    click: (e) => {
+                      e.target.openPopup();
+                    },
+                  }}
+                >
+                  <Popup className="request-popup">{ssLocation.name}</Popup>
+                </Marker>
+
                 <Polyline
                   key={`ssLocLine${index}`}
                   positions={[ssLocation.location, ssLocation.userLocation]}

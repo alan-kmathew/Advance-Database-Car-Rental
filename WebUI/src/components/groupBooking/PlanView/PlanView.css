@@ -36,7 +36,9 @@
   display: flex;
   flex-direction: column;
   gap: 5px;
-  transition: box-shadow 0.5s;
+  transition: box-shadow 0.1s;
+
+ 
   cursor: pointer;
 }
 .planItem > .userCityName {

@@ -1,0 +1,11 @@
+.request-popup .leaflet-popup-content-wrapper {
+    border-radius: 0px;
+    width: 200Px;
+    max-height: 50px;
+    font-size: 20px;
+    border-radius: 10px;
+    text-align: center;
+}
+   
+    
+
