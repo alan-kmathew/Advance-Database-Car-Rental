@@ -73,6 +73,7 @@ const executeShortestPathQuery = async (session, fromLocation, toLocation) => {
     }
 };
 
+
 const executeMultipleCitiesShortestPathQuery = async (session, cityLists) => {
     try {
         const createGraphQuery = `
@@ -411,28 +412,25 @@ const getServiceStationWithMostBookings = async (
     }
 };
 
-const getRideSharingCarDetails = async (
-    source_location,
-    destination_location,
-    travel_date,
-    nearyByServiceStations
-) => {
-    console.log('inside getRideSharingCarDetails');
+const getRideSharingCarDetails = async (source_location, destination_location, travel_date, nearyByServiceStations) => {
     if (!source_location || !destination_location || !travel_date) {
-        return res.status(400).json({ error: 'All fields are required' });
+        throw new Error('All fields are required');
     }
-    //const travelDate = new Date(travel_date);
     const travelDate = moment(travel_date); // Assuming travel_date is a string
-    console.log('travelDate--------->', travelDate);
-    const serviceStationIds = nearyByServiceStations.map(
-        station => new mongoose.Types.ObjectId(station.serviceStationID)
-    );
+    console.log("travelDate------------>", travelDate);
+    const serviceStationIds = nearyByServiceStations.map(station => new mongoose.Types.ObjectId(station.serviceStationID));
+    console.log("serviceStationIds--------------->", serviceStationIds);
+
     try {
+        // Fetch the service stations data
+        const serviceStationsResponse = await axios.get('http://localhost:8020/api/car/get/servicePoints');
+        const serviceStations = serviceStationsResponse.data;
         const availableBookingsArray = await BookingsModel.aggregate([
             {
                 $match: {
                     servicePointId: { $in: serviceStationIds },
-                    $or: [{ type: 'sharing' }, { type: 'passenger' }],
+                    destination: destination_location,
+                    type: 'sharing'
                 },
             },
             {
@@ -462,6 +460,7 @@ const getRideSharingCarDetails = async (
                     type: 1,
                     bookingDate: 1,
                     destination: 1,
+                    carId: 1,
                     'carDetails.model': 1,
                     'carDetails.type': 1,
                     'carDetails.category': 1,
@@ -472,23 +471,69 @@ const getRideSharingCarDetails = async (
                     'carDetails.seats': 1,
                 },
             },
+            {
+                $group: {
+                    _id: "$type",
+                    details: {
+                        $push: {
+                            _id: "$_id",
+                            startDate: "$startDate",
+                            endDate: "$endDate",
+                            customer: "$customer",
+                            price: "$price",
+                            servicePointId: "$servicePointId",
+                            type: "$type",
+                            bookingDate: "$bookingDate",
+                            destination: "$destination",
+                            carId: "$carId",
+                            carDetails: "$carDetails",
+                        },
+                    },
+                },
+            },
+            {
+                $project: {
+                    _id: 0,
+                    type: "$_id",
+                    details: 1,
+                },
+            },
         ]).exec();
-        console.log('availableCars----------->', availableCars);
-        console.log('availableCars before filtering----------->', availableCars);
 
-        // Filter available cars based on travel date
-        const filteredCars = availableCars.filter(car => {
+        console.log("availableBookingsArray-------->", JSON.stringify(availableBookingsArray));
+
+        if (!availableBookingsArray || availableBookingsArray.length === 0) {
+            throw new Error('No available bookings found');
+        }
+
+        let filteredSharingBookings = availableBookingsArray[0].details.filter(car => {
             const startDate = moment(car.startDate);
             const endDate = moment(car.endDate);
-            return travelDate.isBetween(startDate, endDate, null, '[]'); // Check if travelDate is between startDate and endDate inclusive
+            return travelDate.isBetween(startDate, endDate, null, '[]');
         });
 
-        console.log('availableCars after filtering----------->', filteredCars);
-        //   res.json({ availableCars });
+        console.log("filteredBookings--------------->", filteredSharingBookings);
+
+        // Add coordinates to the bookings
+        const addCoordinates = (bookings) => {
+            return bookings.map(booking => {
+                const serviceStation = serviceStations.find(station => station._id === booking.servicePointId.toString());
+                return {
+                    ...booking,
+                    coordinates: serviceStation ? serviceStation.coordinates : null,
+                };
+            });
+        };
+
+        filteredSharingBookings = addCoordinates(filteredSharingBookings);
+
+        return {
+            filteredBookings: filteredSharingBookings
+        };
+
     } catch (error) {
         console.error(error);
-        logger.error('Error fetching ride sharing car details:', error);
-        return res.status(500).json({ error: 'Internal server error' });
+        throw new Error('Error fetching ride sharing car details');
     }
 };
 
@@ -528,10 +573,14 @@ const checkPossibleToShareTheCar = async (
     if (!source_location || !destination_location || !travel_date) {
         throw new Error('All fields are required');
     }
-    const travelDate = moment(travel_date);
+    const travelDate = moment(travel_date).startOf('day');
     const randomName = faker.person.fullName();
     const randomEmail = faker.internet.email();
-
+    console.log("source_location",source_location);
+    console.log("destination_location",destination_location);
+    console.log("travel_date",travel_date);
+    console.log("carId",carId);
+    
     try {
         const carBooking = await BookingsModel.findOne({
             type: 'sharing',
@@ -568,14 +617,13 @@ const checkPossibleToShareTheCar = async (
         console.log('route----------------->', route.routeDetails);
 
         const passenger_source_cords = await getCoordinatesForLocation(source_location);
-        console.log('passenger_source_cords----------->', passenger_source_cords);
+
 
         // Parse the passenger location
         const passengerLocation = {
             lat: passenger_source_cords.lat,
             lng: passenger_source_cords.lon,
         };
-        console.log('passengerLocation-------------------->', passengerLocation);
 
         // Check if the passenger's location is on the route
         if (!isPassengerOnRoute(passengerLocation, route.routeDetails)) {
@@ -698,6 +746,74 @@ async function getCoordinatesForLocation(locationName) {
     }
 }
 
+const fetchPassengerBookings = async (fromDate, toDate, source_location_id, destination_location) => {
+    console.log("inside passenger bookings");
+
+    // Ensure dates are properly parsed
+    const fromDateParsed = parseAndValidateDate(fromDate);
+    const toDateParsed = parseAndValidateDate(toDate);
+    const servicePointObjectId = new mongoose.Types.ObjectId(source_location_id);
+
+    console.log("date", fromDateParsed, toDateParsed);
+
+    // Fetch service stations data
+    const serviceStationsResponse = await axios.get('http://localhost:8020/api/car/get/servicePoints');
+    const serviceStations = serviceStationsResponse.data;
+
+    // Find the name of the service station
+    const serviceStation = serviceStations.find(station => station._id === servicePointObjectId.toString());
+    if (!serviceStation) {
+        throw new Error('Service station not found');
+    }
+    const serviceStationName = serviceStation.name;
+
+    console.log("serviceStationName---------->", serviceStationName);
+
+    // Query MongoDB to find passenger bookings matching the criteria
+    const passengerBookings = await BookingsModel.find({
+        type: 'passenger',
+        destination: destination_location,
+        servicePointId: servicePointObjectId,
+        $or: [
+            // Case 1: Booking starts within the given range
+            { startDate: { $gte: fromDateParsed, $lte: toDateParsed } },
+            // Case 2: Booking ends within the given range
+            { endDate: { $gte: fromDateParsed, $lte: toDateParsed } },
+            // Case 3: Booking period fully encompasses the given range
+            { startDate: { $lte: fromDateParsed }, endDate: { $gte: toDateParsed } }
+        ]
+    }).exec();
+
+    console.log("passengerBookings--------------->", passengerBookings);
+    if (!passengerBookings || passengerBookings.length === 0) {
+        throw new Error('No passenger bookings found for the given criteria');
+    }
+    // Structure the response data
+    const passengerData = passengerBookings.map(booking => ({
+        name: booking.customer.name,
+        source_location: booking.source_location
+    }));
+
+    const response = {
+        serviceStationName: serviceStationName,
+        passengerData: passengerData,
+        destination: destination_location
+    };
+
+    return response;
+};
+
+
+
+const parseAndValidateDate = (dateString) => {
+    console.log("dateString",dateString);
+    const parsedDate = new Date(dateString);
+    if (isNaN(parsedDate.getTime())) {
+        throw new Error(`Invalid date format: ${dateString}`);
+    }
+    return parsedDate;
+};
+
 module.exports = { getRideSharingCarDetails };
 
 module.exports = {
@@ -708,7 +824,9 @@ module.exports = {
     getRideSharingCarDetails,
     executeMultipleCitiesShortestPathQuery,
     getCoordinatesOfCity,
+    transferCarsBetweenStations,
     checkPossibleToShareTheCar,
+    fetchPassengerBookings,
     fetchRoute,
     transferCarsBetweenStations,
 };
