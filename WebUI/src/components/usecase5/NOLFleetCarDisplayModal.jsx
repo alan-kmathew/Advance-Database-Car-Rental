@@ -1,6 +1,7 @@
 import React from "react";
 import "../../styles/NOLFleetCarDisplayModal.css";
 
+
 const NOLFleetCarDisplayModal = ({ show, onClose, children }) => {
   if (!show) {
     return null;
@@ -19,6 +20,27 @@ const NOLFleetCarDisplayModal = ({ show, onClose, children }) => {
           X
         </button>
         <div className="modal-content">{children}</div>
+        <br />
+        <br />
+        <br />
+        <br />
+        <br />
+        <br />
+        <br /> <br />
+        <br />
+        <br />
+        <br />
+        <br />
+        <br />
+        <br />/
+        <br />
+        <br />
+        <br /> <br />
+        <br />
+        <br />
+        <br />
+        <br />
+        
       </div>
     </div>
   );

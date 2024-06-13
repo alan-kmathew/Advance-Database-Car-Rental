@@ -3,9 +3,9 @@ import axios from "axios";
 import "../../styles/FleetInputForm.css";
 
 const NOLInputForm = ({ setServiceStations }) => {
-  const [name, setName] = useState("");
-  const [longitude, setLongitude] = useState("");
-  const [latitude, setLatitude] = useState("");
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
+  const [stationCount, setStationCount] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -14,9 +14,9 @@ const NOLInputForm = ({ setServiceStations }) => {
         "http://localhost:8020/api/car/get/station/highbookings",
         {
           params: {
-            name: name,
-            longitude: longitude,
-            latitude: latitude,
+            fromDate: fromDate,
+            toDate: toDate,
+            numberOfServiceStations: stationCount,
           },
         }
       );
@@ -38,31 +38,33 @@ const NOLInputForm = ({ setServiceStations }) => {
 
   return (
     <form className="fleet-opt-form" onSubmit={handleSubmit}>
-      <label>Find Service Stations by Name and Location</label>
+      <label>The Most Booked Service Stations During The Period</label>
       <div className="input-group">
-        <label>Name:</label>
+        <label>From Date:</label>
         <input
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
+          type="date"
+          value={fromDate}
+          onChange={(e) => setFromDate(e.target.value)}
           required
         />
       </div>
       <div className="input-group">
-        <label>Longitude:</label>
+        <label>To Date:</label>
         <input
-          type="text"
-          value={longitude}
-          onChange={(e) => setLongitude(e.target.value)}
+          type="date"
+          value={toDate}
+          onChange={(e) => setToDate(e.target.value)}
           required
         />
       </div>
       <div className="input-group">
-        <label>Latitude:</label>
+        <label>Number of Service Stations for New Location:</label>
         <input
-          type="text"
-          value={latitude}
-          onChange={(e) => setLatitude(e.target.value)}
+          type="number"
+          value={stationCount}
+          onChange={(e) => setStationCount(e.target.value)}
+          min="1"
+          placeholder="Enter number of stations"
           required
         />
       </div>

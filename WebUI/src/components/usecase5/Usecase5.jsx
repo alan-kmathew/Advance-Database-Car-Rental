@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
-import FleetInputForm from "./FleetInputForm";
 import NOLInputForm from "./NOLInputForm";
 
 import Legend from "./Legend";
@@ -9,7 +8,6 @@ import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet-curve";
 import NOLFleetCarDisplayModal from "./NOLFleetCarDisplayModal";
-import FleetFormModal from "./FleetFormModal";
 
 const ServicePointIcon = L.divIcon({
   className: "custom-icon",
@@ -29,23 +27,6 @@ const ServicePointIconHighlighted = L.divIcon({
   iconAnchor: [20, 40],
 });
 
-// const NearestServicePointIconHighlighted = L.divIcon({
-//   className: "custom-icon highlighted-icon",
-//   html:
-//     '<div class="inner-icon"><img src="' +
-//     require("../../Assets/green-location-icon.png") +
-//     '" style="width: 40px; height: 40px;" /></div>',
-//   iconAnchor: [20, 40],
-// });
-
-// const NearestRouteIcon = L.divIcon({
-//   className: "custom-icon",
-//   html:
-//     '<div class="inner-icon"><img src="' +
-//     require("../../Assets/nearestrouteicon.png") +
-//     '" style="width: 30px; height: 30px;" /></div>',
-//   iconAnchor: [15, 30],
-// });
 
 function FleetMapDisplay() {
   const [serviceStations, setServiceStations] = useState([]);
@@ -60,10 +41,9 @@ function FleetMapDisplay() {
 
   const [filteredServicePoints, setFilteredServicePoints] = useState([]);
   const [showModal, setShowModal] = useState(false);
-  const [showFormModal, setShowFormModal] = useState(false);
+ 
   const [selectedStation, setSelectedStation] = useState(null);
-  const [selectedNearestStation, setNearestSelectedStation] = useState(null);
-  const [shortestRouteDetails, setShortestRouteDetails] = useState([]);
+ 
 
   useEffect(() => {
     const fetchAllServicePoints = async () => {
@@ -106,143 +86,13 @@ function FleetMapDisplay() {
     setFilteredServicePoints(filteredPoints);
   }, [allServicePoints, serviceStations]);
 
-  const handleMoreDetailsClick = (station, popupIndex) => {
-    popupRefs.current[popupIndex].remove(); // Close the popup
-    setSelectedStation(station);
-    setShowModal(true);
-  };
-
-  const handleOpenFormClick = (station, popupIndex) => {
-    popupRefs.current[popupIndex].remove(); // Close the popup
-    setNearestSelectedStation(station);
-    setShowFormModal(true);
-  };
-
   const handleClosePopup = (popupIndex) => {
     popupRefs.current[popupIndex].remove();
   };
 
-  const Curves = ({ stations }) => {
-    const map = useMap();
-
-    useEffect(() => {
-      stations.forEach((station) => {
-        station.nearestServiceStations.forEach((nearestStation) => {
-          const from = [station.latitude, station.longitude];
-          const to = [nearestStation.latitude, nearestStation.longitude];
-          const latlngs = createCurve(from, to);
-
-          L.curve(latlngs, {
-            color: "darkred",
-            weight: 3,
-            opacity: 0.8,
-            dashArray: "5, 5",
-          }).addTo(map);
-        });
-      });
-
-      return () => {
-        map.eachLayer((layer) => {
-          if (layer instanceof L.Curve) {
-            map.removeLayer(layer);
-          }
-        });
-      };
-    }, [map, stations]);
-
-    return null;
-  };
-
-  // const ShortestRoutes = ({ routes }) => {
-  //   const map = useMap();
-
-  //   useEffect(() => {
-  //     const routeLayers = [];
-  //     let totalDistance = 0;
-
-  //     routes.forEach((route) => {
-  //       totalDistance += route.totalDistance;
-  //       route.routeDetails.forEach((detail, index) => {
-  //         if (index < route.routeDetails.length - 1) {
-  //           const from = [detail.latitude, detail.longitude];
-  //           const to = [
-  //             route.routeDetails[index + 1].latitude,
-  //             route.routeDetails[index + 1].longitude,
-  //           ];
-  //           const latlngs = createCurve(from, to);
-
-  //           const curve = L.curve(latlngs, {
-  //             color: "blue",
-  //             weight: 3,
-  //             opacity: 0.8,
-  //             dashArray: "5, 5",
-  //           }).addTo(map);
-
-  //           routeLayers.push(curve);
-  //         }
-  //       });
-
-  //       // Add markers with popups for each point in the route
-  //       route.routeDetails.forEach((detail, index) => {
-  //         // Skip the first and last markers to avoid overlap
-  //         if (
-  //           index !== 0 &&
-  //           index !== route.routeDetails.length - 1 &&
-  //           !allServicePoints.some(
-  //             (point) =>
-  //               point.coordinates[0] === detail.latitude &&
-  //               point.coordinates[1] === detail.longitude
-  //           )
-  //         ) {
-  //           const marker = L.marker([detail.latitude, detail.longitude], {
-  //             icon: NearestRouteIcon,
-  //           })
-  //             .addTo(map)
-  //             .bindPopup(
-  //               `<div style="text-align: center;"><b>${
-  //                 detail?.pathName || detail?.cityname
-  //               }</b></div>`
-  //             );
-  //           routeLayers.push(marker);
-  //         }
-  //       });
-  //     });
-
-  //     setTotalDistance(totalDistance);
-
-  //     return () => {
-  //       routeLayers.forEach((layer) => {
-  //         map.removeLayer(layer);
-  //       });
-  //     };
-  //   }, [map, routes]);
-
-  //   return null;
-  // };
-
-  const createCurve = (latlng1, latlng2) => {
-    const offsetX = latlng2[1] - latlng1[1];
-    const offsetY = latlng2[0] - latlng1[0];
-
-    const r = Math.sqrt(Math.pow(offsetX, 2) + Math.pow(offsetY, 2));
-    const theta = Math.atan2(offsetY, offsetX);
-
-    const thetaOffset = Math.PI / 10;
-
-    const r2 = r / 2 / Math.cos(thetaOffset);
-    const theta2 = theta - thetaOffset;
-
-    const midpointX = r2 * Math.cos(theta2) + latlng1[1];
-    const midpointY = r2 * Math.sin(theta2) + latlng1[0];
-
-    const midpointLatLng = [midpointY, midpointX];
-
-    return ["M", latlng1, "Q", midpointLatLng, latlng2];
-  };
-
   return (
     <div className="fleet-opt-container">
-      <FleetInputForm setServiceStations={setServiceStations} />
+      <NOLInputForm setServiceStations={setServiceStations} />
       <MapContainer
         center={[49.4875, 8.466]}
         zoom={6}
@@ -303,89 +153,13 @@ function FleetMapDisplay() {
                 />
                 <p>Total Cars: {station.totalCarsAvailable}</p>
                 <p>Total Bookings: {station.totalBookings}</p>
-                {/* <a
-                  style={{ marginTop: "10px" }}
-                  href="#"
-                  className="more-details-link"
-                  onClick={() =>
-                    handleMoreDetailsClick(
-                      station,
-                      filteredServicePoints.length + index
-                    )
-                  }
-                >
-                  Add Another Station
-                </a> */}
+               
               </div>
             </Popup>
           </Marker>
         ))}
 
-        {/* {serviceStations.map((station, stationIndex) =>
-          station?.nearestServiceStations.map(
-            (nearestStation, nearestIndex) => (
-              <Marker
-                key={`${station?.servicePointId}-${nearestIndex}`}
-                position={[nearestStation?.latitude, nearestStation?.longitude]}
-                icon={NearestServicePointIconHighlighted}
-              >
-                <Popup
-                  ref={(ref) =>
-                    (popupRefs.current[
-                      filteredServicePoints.length +
-                        serviceStations.length +
-                        stationIndex * station.nearestServiceStations.length +
-                        nearestIndex
-                    ] = ref)
-                  }
-                >
-                  <div className="popup">
-                    <button
-                      className="close-popup-btn"
-                      onClick={() =>
-                        handleClosePopup(
-                          filteredServicePoints.length +
-                            serviceStations.length +
-                            stationIndex *
-                              station.nearestServiceStations.length +
-                            nearestIndex
-                        )
-                      }
-                    >
-                      ✕
-                    </button>
-                    <h2>{nearestStation.locatedInCity} Station</h2>
-                    <img
-                      src={nearestStation.image}
-                      alt={nearestStation.locatedInCity}
-                    />
-                    <p>Total Cars: {nearestStation.carList.length}</p>
-                    <a
-                      style={{ marginTop: "10px" }}
-                      href="#"
-                      className="fleet-modal-body"
-                      onClick={() =>
-                        handleOpenFormClick(
-                          nearestStation,
-                          filteredServicePoints.length +
-                            serviceStations.length +
-                            stationIndex *
-                              station.nearestServiceStations.length +
-                            nearestIndex
-                        )
-                      }
-                    >
-                      Open Form
-                    </a>
-                  </div>
-                </Popup>
-              </Marker>
-            )
-          )
-        )} */}
-
-        {/* <Curves stations={serviceStations} /> */}
-        {/* <ShortestRoutes routes={shortestRouteDetails} /> */}
+        
 
         <Legend />
        
@@ -393,22 +167,12 @@ function FleetMapDisplay() {
           <NOLFleetCarDisplayModal
             show={showModal}
             onClose={() => setShowModal(false)}
-          >
-            
-           <NOLInputForm/>
+          > 
+           
           </NOLFleetCarDisplayModal>
         )}
 
-        {selectedNearestStation && (
-          <FleetFormModal
-            show={showFormModal}
-            onClose={() => setShowFormModal(false)}
-            allServicePoints={allServicePoints}
-            selectedNearestStation={selectedNearestStation}
-            setShortestRouteDetails={setShortestRouteDetails}
-            setOptimizationDetails={setOptimizationDetails}
-          />
-        )}
+    
       </MapContainer>
     </div>
   );
