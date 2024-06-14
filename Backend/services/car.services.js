@@ -412,23 +412,24 @@ const getServiceStationWithMostBookings = async (
     }
 };
 
-const getRideSharingCarDetails = async (source_location, destination_location, travel_date, nearyByServiceStations) => {
+const getRideSharingCarDetails = async (neo4jSession, source_location, destination_location, travel_date) => {
     if (!source_location || !destination_location || !travel_date) {
         throw new Error('All fields are required');
     }
     const travelDate = moment(travel_date); // Assuming travel_date is a string
     console.log("travelDate------------>", travelDate);
-    const serviceStationIds = nearyByServiceStations.map(station => new mongoose.Types.ObjectId(station.serviceStationID));
-    console.log("serviceStationIds--------------->", serviceStationIds);
+
 
     try {
         // Fetch the service stations data
         const serviceStationsResponse = await axios.get('http://localhost:8020/api/car/get/servicePoints');
         const serviceStations = serviceStationsResponse.data;
+        console.log("serviceStations------------->", serviceStations);
+        console.log("destination location--------->", destination_location);
         const availableBookingsArray = await BookingsModel.aggregate([
             {
                 $match: {
-                    servicePointId: { $in: serviceStationIds },
+                    //servicePointId: { $in: serviceStationIds },
                     destination: destination_location,
                     type: 'sharing'
                 },
@@ -511,25 +512,40 @@ const getRideSharingCarDetails = async (source_location, destination_location, t
             const endDate = moment(car.endDate);
             return travelDate.isBetween(startDate, endDate, null, '[]');
         });
+        const passenger_source_cords = await getCoordinatesOfCity(neo4jSession, source_location);
 
+
+        // Parse the passenger location
+        const passengerLocation = {
+            lat: passenger_source_cords.lat,
+            lng: passenger_source_cords.lon,
+        };
+
+        // Check if the passenger's location is on the route
+        let validBookings = [];
         console.log("filteredBookings--------------->", filteredSharingBookings);
+        for (const booking of filteredSharingBookings) {
+            const serviceStationName = await fetchServiceStationName(neo4jSession, booking.servicePointId.toString());
+            const route = await getShortestPath(serviceStationName, booking.destination);
+            console.log("Booking:", booking);
+            console.log("Service Station Name:", serviceStationName);
+            console.log("Route:", route.routeDetails);
 
-        // Add coordinates to the bookings
-        const addCoordinates = (bookings) => {
-            return bookings.map(booking => {
+            if (isPassengerOnRoute(passengerLocation, route.routeDetails)) {
+                console.log("Passenger is on route");
+                // Add coordinates to the booking
                 const serviceStation = serviceStations.find(station => station._id === booking.servicePointId.toString());
-                return {
+                const bookingWithCoordinates = {
                     ...booking,
                     coordinates: serviceStation ? serviceStation.coordinates : null,
                 };
-            });
-        };
+                validBookings.push(bookingWithCoordinates);
+            }
+        }
+        console.log("validBookings-------------->", validBookings);
+        return validBookings;
 
-        filteredSharingBookings = addCoordinates(filteredSharingBookings);
 
-        return {
-            filteredBookings: filteredSharingBookings
-        };
 
     } catch (error) {
         console.error(error);
@@ -573,7 +589,7 @@ const checkPossibleToShareTheCar = async (
     if (!source_location || !destination_location || !travel_date) {
         throw new Error('All fields are required');
     }
-    const travelDate = moment(travel_date).startOf('day');
+    const travelDate = moment.utc(travel_date).startOf('day');
     const randomName = faker.person.fullName();
     const randomEmail = faker.internet.email();
     console.log("source_location",source_location);
@@ -591,45 +607,6 @@ const checkPossibleToShareTheCar = async (
         if (!carBooking) {
             throw new Error('Car booking not found');
         }
-        //get name of servicepointId and get  coordinate details for source and destination
-        const serviceStationId = carBooking.servicePointId.toString();
-        const query = `
-            MATCH (s:ServiceStations {serviceStationId: $serviceStationId})
-            RETURN s.serviceStationName AS serviceStationName`;
-
-        const result = await neo4jSession.run(query, { serviceStationId });
-        const serviceStationName = result.records[0]?.get('serviceStationName');
-
-        if (!serviceStationName) {
-            throw new Error('Service station name not found');
-        }
-        // const source_location_cords = await getCoordinatesForLocation(serviceStationName);
-        // const destination_location_cords = await getCoordinatesForLocation(carBooking.destination);
-        console.log('serviceStationName----------_>', serviceStationName);
-        console.log('carBooking.destination------------------>', carBooking.destination);
-        // Fetch the route using the provided API
-        const apiUrl = `http://localhost:8020/api/car/get/shortestpath?fromLocation=${encodeURIComponent(
-            serviceStationName
-        )}&toLocation=${encodeURIComponent(carBooking.destination)}`;
-        console.log('apiUrl-------------->', apiUrl);
-        const routeResponse = await axios.get(apiUrl);
-        const route = routeResponse.data[0];
-        console.log('route----------------->', route.routeDetails);
-
-        const passenger_source_cords = await getCoordinatesForLocation(source_location);
-
-
-        // Parse the passenger location
-        const passengerLocation = {
-            lat: passenger_source_cords.lat,
-            lng: passenger_source_cords.lon,
-        };
-
-        // Check if the passenger's location is on the route
-        if (!isPassengerOnRoute(passengerLocation, route.routeDetails)) {
-            throw new Error('Passenger location is not along the route');
-        }
-
         const payload = {
             carId: carBooking.carId,
             startDate: travelDate.toDate(),
@@ -748,7 +725,7 @@ async function getCoordinatesForLocation(locationName) {
 
 const fetchPassengerBookings = async (fromDate, toDate, source_location_id, destination_location) => {
     console.log("inside passenger bookings");
-
+    
     // Ensure dates are properly parsed
     const fromDateParsed = parseAndValidateDate(fromDate);
     const toDateParsed = parseAndValidateDate(toDate);
@@ -799,7 +776,7 @@ const fetchPassengerBookings = async (fromDate, toDate, source_location_id, dest
         passengerData: passengerData,
         destination: destination_location
     };
-
+    console.log("response---------->",response);
     return response;
 };
 
@@ -813,6 +790,62 @@ const parseAndValidateDate = (dateString) => {
     }
     return parsedDate;
 };
+
+async function fetchServiceStationName(neo4jSession, serviceStationId) {
+    const query = `
+        MATCH (s:ServiceStations {serviceStationId: $serviceStationId})
+        RETURN s.serviceStationName AS serviceStationName
+    `;
+    const result = await neo4jSession.run(query, { serviceStationId });
+    const serviceStationName = result.records[0]?.get('serviceStationName');
+    if (!serviceStationName) {
+        throw new Error('Service station name not found');
+    }
+    return serviceStationName;
+}
+
+const formatCityNamesWithTypes = (passengerBookingData, routeData) => {
+    const { cityNames, routeDetails } = routeData;
+
+    const formattedCityNames = cityNames.map((cityName, index) => {
+        let type;
+        let name = "";
+        const locationName = cityName;
+
+        if (index === 0) {
+            type = 'serviceStation';
+        } else if (index === cityNames.length - 1) {
+            type = 'destination';
+        } else {
+            type = 'passenger';
+            const passenger = passengerBookingData.passengerData.find(passenger => passenger.source_location === cityName);
+            if (passenger) {
+                name = passenger.name;
+            }
+        }
+
+        const routeDetail = routeDetails.find(route => route.cityname === cityName);
+        const longitude = routeDetail?.longitude || null;
+        const latitude = routeDetail?.latitude || null;
+
+        return {
+            name: name,
+            type: type,
+            locationName: locationName,
+            longitude: longitude,
+            latitude: latitude
+        };
+    });
+
+    return formattedCityNames;
+};
+
+
+async function getShortestPath(serviceStationName, destination) {
+    const apiUrl = `http://localhost:8020/api/car/get/shortestpath?fromLocation=${encodeURIComponent(serviceStationName)}&toLocation=${encodeURIComponent(destination)}`;
+    const response = await axios.get(apiUrl);
+    return response.data[0];
+}
 
 module.exports = { getRideSharingCarDetails };
 
@@ -829,4 +862,7 @@ module.exports = {
     fetchPassengerBookings,
     fetchRoute,
     transferCarsBetweenStations,
+    fetchServiceStationName,
+    getShortestPath,
+    formatCityNamesWithTypes
 };

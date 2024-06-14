@@ -17,7 +17,8 @@ const {
     getCoordinatesOfCity,
     transferCarsBetweenStations,
     checkPossibleToShareTheCar,
-    fetchPassengerBookings
+    fetchPassengerBookings,
+    formatCityNamesWithTypes
 } = require('../services/car.services');
 const dbService = require('../db/dbconfig/db');
 const axios = require('axios'); 
@@ -312,15 +313,12 @@ router.post('/get/riderdetails', async (req, res) => {
         }
 
         const neo4jSession = await dbService.connectNeo4j();
-        const nearestServiceStationResult = await executeNearestServiceStationQuery(
-            neo4jSession,
-            req.body.source_location
-        );
+       
         const matchedRideSharingCarDetails = await getRideSharingCarDetails(
+            neo4jSession,
             req.body.source_location,
             req.body.destination_location,
             req.body.travel_date,
-            nearestServiceStationResult
         );
 
         // If the function runs successfully, return the booking details
@@ -404,47 +402,26 @@ router.post('/get/passengerRouteDetails', async (req, res) => {
 
         const { from_date, to_date ,source_location_id, destination_location} = req.body;
         const passengerBookingData = await fetchPassengerBookings(from_date, to_date, source_location_id, destination_location);
-
+        console.log("passengerBookingData---------->",passengerBookingData);
         // Prepare the request body for the shortest path API
         const cityLists = [
             passengerBookingData.serviceStationName,
             ...passengerBookingData.passengerData.map(data => data.source_location),
             passengerBookingData.destination
         ];
+        console.log("cityLists---------->")
 
         const requestBody = { cityLists: cityLists };
 
         // Pass the response to the shortest path API and capture the response
         const shortestPathResponse = await axios.post('http://localhost:8020/api/car/shortestPath', requestBody);
-        console.log("shortestPathResponse----totalDistanceInMiles-------->",shortestPathResponse.data[0].totalDistanceInMiles);
+        console.log("shortestPathResponse----totalDistanceInMiles-------->",shortestPathResponse.data[0]);
         // Extract the response data    
         const routeDetails = shortestPathResponse.data[0].routeDetails;
         const cityNames = shortestPathResponse.data[0].cityNames;
 
         // Structure the final response
-        const formattedCityNames = cityNames.map((cityName, index) => {
-            const type = index === 0 ? 'serviceStation' : (index === cityNames.length - 1 ? 'destination' : 'passenger');
-            let longitude = null;
-            let latitude = null;
-        
-            // Find the route detail for the current city name
-            const routeDetail = routeDetails.find(route => route.cityname === cityName);
-            if (routeDetail) {
-                longitude = routeDetail.longitude;
-                latitude = routeDetail.latitude;
-            }
-        
-            const name = type === 'passenger' ? passengerBookingData.passengerData[index - 1].name : "";
-            const locationName = cityName;
-        
-            return {
-                name: name,
-                type: type,
-                locationName: locationName,
-                longitude: longitude,
-                latitude: latitude
-            };
-        });
+        const formattedCityNames = formatCityNamesWithTypes(passengerBookingData, shortestPathResponse.data[0]);
 
         console.log("formattedCityNames--------->",formattedCityNames);
 

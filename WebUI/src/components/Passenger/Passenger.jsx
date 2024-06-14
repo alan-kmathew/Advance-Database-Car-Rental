@@ -25,7 +25,7 @@ const Passenger = () => {
         body: JSON.stringify(data)
       });
       const result = await response.json();
-      setMarkers(result.data.filteredBookings);
+      setMarkers(result.data);
       setSource(data.source_location);
       setDestination(data.destination_location);
       setTravelDate(data.travel_date);
