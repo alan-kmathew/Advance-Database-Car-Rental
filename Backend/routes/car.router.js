@@ -402,20 +402,18 @@ router.post('/get/passengerRouteDetails', async (req, res) => {
 
         const { from_date, to_date ,source_location_id, destination_location} = req.body;
         const passengerBookingData = await fetchPassengerBookings(from_date, to_date, source_location_id, destination_location);
-        console.log("passengerBookingData---------->",passengerBookingData);
+        
         // Prepare the request body for the shortest path API
         const cityLists = [
             passengerBookingData.serviceStationName,
             ...passengerBookingData.passengerData.map(data => data.source_location),
             passengerBookingData.destination
         ];
-        console.log("cityLists---------->")
 
         const requestBody = { cityLists: cityLists };
 
         // Pass the response to the shortest path API and capture the response
         const shortestPathResponse = await axios.post('http://localhost:8020/api/car/shortestPath', requestBody);
-        console.log("shortestPathResponse----totalDistanceInMiles-------->",shortestPathResponse.data[0]);
         // Extract the response data    
         const routeDetails = shortestPathResponse.data[0].routeDetails;
         const cityNames = shortestPathResponse.data[0].cityNames;
@@ -423,7 +421,7 @@ router.post('/get/passengerRouteDetails', async (req, res) => {
         // Structure the final response
         const formattedCityNames = formatCityNamesWithTypes(passengerBookingData, shortestPathResponse.data[0]);
 
-        console.log("formattedCityNames--------->",formattedCityNames);
+       
 
         // // Return the structured response
         return res.status(200).json({

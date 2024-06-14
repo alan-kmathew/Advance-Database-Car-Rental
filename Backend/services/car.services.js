@@ -698,7 +698,7 @@ const haversine = (location1, location2) => {
     return R * c; // Distance in kilometers
 };
 
-const isPassengerOnRoute = (passengerLocation, route, maxDistance = 25.0) => {
+const isPassengerOnRoute = (passengerLocation, route, maxDistance = 50.0) => {
     console.log;
     console.log('route------------>', route);
     for (const waypoint of route) {
@@ -805,40 +805,43 @@ async function fetchServiceStationName(neo4jSession, serviceStationId) {
 }
 
 const formatCityNamesWithTypes = (passengerBookingData, routeData) => {
-    const { cityNames, routeDetails } = routeData;
+    const { routeDetails } = routeData;
+    const serviceStationName = passengerBookingData.serviceStationName;
+    const destinationName = passengerBookingData.destination;
 
-    const formattedCityNames = cityNames.map((cityName, index) => {
+    const formattedCityNames = routeDetails.map(routeDetail => {
         let type;
         let name = "";
-        const locationName = cityName;
+        const locationName = routeDetail.cityname;
 
-        if (index === 0) {
+        if (locationName === serviceStationName) {
             type = 'serviceStation';
-        } else if (index === cityNames.length - 1) {
+        } else if (locationName === destinationName) {
             type = 'destination';
         } else {
             type = 'passenger';
-            const passenger = passengerBookingData.passengerData.find(passenger => passenger.source_location === cityName);
+            const passenger = passengerBookingData.passengerData.find(passenger => passenger.source_location === locationName);
             if (passenger) {
                 name = passenger.name;
+            } else {
+                type = null; // No match, so ignore this location
             }
         }
 
-        const routeDetail = routeDetails.find(route => route.cityname === cityName);
-        const longitude = routeDetail?.longitude || null;
-        const latitude = routeDetail?.latitude || null;
-
-        return {
-            name: name,
-            type: type,
-            locationName: locationName,
-            longitude: longitude,
-            latitude: latitude
-        };
-    });
+        if (type) {
+            return {
+                name: name,
+                type: type,
+                locationName: locationName,
+                longitude: routeDetail.longitude,
+                latitude: routeDetail.latitude
+            };
+        }
+    }).filter(Boolean); // Remove any undefined entries
 
     return formattedCityNames;
 };
+
 
 
 async function getShortestPath(serviceStationName, destination) {
