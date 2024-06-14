@@ -1,0 +1,261 @@
+mongodb Initial DB Creation.
+
+This script is used to make all the collections in mongo 
+
+// Step 1: Insert car models and service points
+db.carModels.drop();
+db.servicePoints.drop();
+db.cars.drop();
+db.bookings.drop();
+
+const carModels = [
+    {model: 'Toyota Corolla', type: 'Sedan', category: 'Economy', image: 'https://hips.hearstapps.com/hmg-prod/images/2024-toyota-corolla-sedan-nightshade-102-64591f781c16b.jpg?crop=0.581xw:0.404xh;0.199xw,0.366xh&resize=1200:*', seats: 5},
+    {model: 'Honda Civic', type: 'Sedan', category: 'Economy', image: 'https://hips.hearstapps.com/hmg-prod/images/2025-honda-civic-hybrid-exterior-109-664bb39d55670.jpg?crop=0.718xw:0.767xh;0.183xw,0.158xh&resize=1200:*', seats: 5},
+    {model: 'Ford Explorer', type: 'SUV', category: 'Standard', image: 'https://hips.hearstapps.com/hmg-prod/images/2021-ford-explorer-timberline-102-1620059693.jpg?crop=0.657xw:0.752xh;0.128xw,0.221xh&resize=1200:*', seats: 7},
+    {model: 'Honda CR-V', type: 'SUV', category: 'Standard', image: 'https://hips.hearstapps.com/hmg-prod/images/10best-trucks-suvs-2023-honda-crv-116-1673298617.jpg?crop=1.00xw:0.750xh;0,0.0745xh&resize=1200:*', seats: 5},
+    {model: 'BMW 7 Series', type: 'Sedan', category: 'Luxury', image: 'https://hips.hearstapps.com/hmg-prod/images/2023-bmw-7-series-prototype-101-1649095250.jpg?crop=0.883xw:0.883xh;0.102xw,0.102xh&resize=1200:*', seats: 5},
+    {model: 'Mercedes-Benz S-Class', type: 'Sedan', category: 'Luxury', image: 'https://www.caranddriver.com/reviews/a34495844/2021-mercedes-benz-s-class-drive/', seats: 5},
+    {model: 'Audi A6', type: 'Sedan', category: 'Premium', image: 'https://hips.hearstapps.com/hmg-prod/images/2021-mercedes-benz-s500-137-1603815322.jpg?crop=0.716xw:0.717xh;0.158xw,0.0612xh&resize=1200:*', seats: 5},
+    {model: 'Tesla Model S', type: 'Sedan', category: 'Premium', image: 'https://hips.hearstapps.com/hmg-prod/images/2024-tesla-model-s-107-6572200e43fa1.jpg?crop=0.586xw:0.496xh;0.204xw,0.271xh&resize=1200:*', seats: 5},
+    {model: 'Chevrolet Tahoe', type: 'SUV', category: 'Premium', image: 'https://hips.hearstapps.com/hmg-prod/images/2022-chevrolet-tahoe-high-country-101-1632768171.jpg?crop=0.643xw:0.543xh;0.207xw,0.315xh&resize=1200:*', seats: 9},
+    {model: 'Cadillac Escalade', type: 'SUV', category: 'Luxury', image: 'https://hips.hearstapps.com/hmg-prod/images/2023-cadillac-escalade-v-290-1660134678.jpg?crop=0.646xw:0.544xh;0.288xw,0.412xh&resize=1200:*', seats: 8},
+    {model: 'Hyundai Sonata', type: 'Sedan', category: 'Economy', image: 'https://hips.hearstapps.com/hmg-prod/images/2021-hyundai-sonata-n-line-lt-551-1635518371.jpg?crop=0.586xw:0.493xh;0.300xw,0.478xh&resize=1200:*', seats: 5},
+    {model: 'Porsche Cayenne', type: 'SUV', category: 'Luxury', image: 'https://hips.hearstapps.com/hmg-prod/images/2024-porsche-cayenne-155-65ea08fc9fc9e.jpg?crop=0.753xw:0.635xh;0.119xw,0.209xh&resize=1200:*', seats: 5},
+    {model: 'Ford Mustang', type: 'Convertible', category: 'Premium', image: 'https://hips.hearstapps.com/hmg-prod/amv-prod-cad-assets/images/13q4/543506/2015-ford-mustang-photos-and-info-news-car-and-driver-photo-545639-s-original.jpg?fill=2:1&resize=1200:*', seats: 4},
+    {model: 'Mazda MX-5', type: 'Convertible', category: 'Standard', image: 'https://hips.hearstapps.com/hmg-prod/amv-prod-cad-assets/wp-content/uploads/2014/09/2016-Mazda-MX-5-Miata-placement-1n-626x382.jpg?resize=980:*', seats: 2},
+    {model: 'Jeep Wrangler', type: 'SUV', category: 'Standard', image: 'https://hips.hearstapps.com/hmg-prod/amv-prod-cad-assets/wp-content/uploads/2014/09/2016-Mazda-MX-5-Miata-placement-1n-626x382.jpg?resize=980:*', seats: 4},
+    {model: 'Nissan Altima', type: 'Sedan', category: 'Economy', image: 'https://hips.hearstapps.com/hmg-prod/images/2023-nissan-altima-101-1654783713.jpg?crop=1xw:1xh;center,top&resize=980:*', seats: 5},
+    {model: 'Chevrolet Malibu', type: 'Sedan', category: 'Standard', image: 'https://hips.hearstapps.com/hmg-prod/images/2022-chevrolet-tahoe-high-country-101-1632768171.jpg?crop=0.643xw:0.543xh;0.207xw,0.315xh&resize=1200:*', seats: 5},
+    {model: 'Lexus RX', type: 'SUV', category: 'Luxury', image: 'https://hips.hearstapps.com/hmg-prod/images/2023-lexus-rx350h-awd-103-1662677255.jpg?crop=0.731xw:0.733xh;0.190xw,0.179xh&resize=1200:*', seats: 5},
+    {model: 'Volkswagen Golf', type: 'Hatchback', category: 'Economy', image: 'https://hips.hearstapps.com/hmg-prod/images/2022-volkswagen-golf-r-101-1608517442.jpg?crop=0.940xw:0.911xh;0.0595xw,0&resize=1200:*', seats: 5},
+    {model: 'Kia Sportage', type: 'SUV', category: 'Compact', image: 'https://hips.hearstapps.com/hmg-prod/images/2024-kia-sportage-x-pro-vs-2024-nissan-rogue-platinum-102-66158852954a6.jpg?crop=0.468xw:0.395xh;0.0634xw,0.332xh&resize=1200:*', seats: 5},
+    {model: 'Toyota RAV4', type: 'SUV', category: 'Compact', image: 'https://hips.hearstapps.com/hmg-prod/images/2024-honda-cr-v-ex-l-vs-2024-toyota-rav-4-trd-off-road-101-65f8889875cb5.jpg?crop=0.476xw:0.400xh;0.0881xw,0.427xh&resize=1200:*', seats: 5},
+    {model: 'Subaru Outback', type: 'Wagon', category: 'Mid-size', image: 'https://hips.hearstapps.com/hmg-prod/images/2023-subaru-outback-white-front-1649823737.jpg?crop=0.827xw:0.608xh;0.0673xw,0.254xh&resize=1200:*', seats: 5},
+    {model: 'BMW X3', type: 'SUV', category: 'Compact Luxury', image: 'https://hips.hearstapps.com/hmg-prod/images/2024-bmw-x3-101-64e782a68ab3d.jpg?crop=0.945xw:0.809xh;0,0.156xh&resize=1200:*', seats: 5},
+    {model: 'Audi Q5', type: 'SUV', category: 'Compact Luxury', image: 'https://hips.hearstapps.com/hmg-prod/images/2024-audi-q5-prestige-103-64b04c303ecdb.jpg?crop=0.896xw:0.754xh;0.0619xw,0.185xh&resize=1200:*', seats: 5},
+    {model: 'Mercedes-Benz GLC-Class', type: 'SUV', category: 'Compact Luxury', image: 'https://hips.hearstapps.com/hmg-prod/images/2023-mercedes-benz-glc-class-plug-in-hybrid-105-1654031645.jpg?crop=0.689xw:0.584xh;0.122xw,0.332xh&resize=1200:*', seats: 5},
+    {model: 'Dodge Challenger', type: 'Muscle', category: 'Performance', image: 'https://hips.hearstapps.com/hmg-prod/images/2023-mercedes-benz-glc-class-plug-in-hybrid-105-1654031645.jpg?crop=0.689xw:0.584xh;0.122xw,0.332xh&resize=1200:*', seats: 4},
+    {model: 'Chevrolet Camaro', type: 'Coupe', category: 'Performance', image: 'https://hips.hearstapps.com/hmg-prod/images/2022-chevrolet-tahoe-high-country-101-1632768171.jpg?crop=0.643xw:0.543xh;0.207xw,0.315xh&resize=1200:* ', seats: 4},
+    {model: 'Lamborghini Aventador', type: 'Coupe', category: 'Exotic', image: 'https://hips.hearstapps.com/hmg-prod/images/2022-lamborghini-aventador-109-1625607587.jpg?crop=0.750xw:0.632xh;0.183xw,0.233xh&resize=1200:*', seats: 2},
+    {model: 'Ferrari 488', type: 'Coupe', category: 'Exotic', image: 'https://hips.hearstapps.com/hmg-prod/images/2019-ferrari-488-pista-125-1528476287.jpg?crop=0.653xw:0.596xh;0.241xw,0.404xh&resize=1200:*', seats: 2},
+    {model: 'Rolls-Royce Phantom', type: 'Sedan', category: 'Luxury', image: 'https://hips.hearstapps.com/hmg-prod/images/2024-rolls-royce-phantom-102-64bad70ba7661.jpg?crop=0.637xw:0.644xh;0.248xw,0.236xh&resize=1200:*', seats: 4},
+    {model: 'Bentley Continental GT', type: 'Coupe', category: 'Luxury', image: 'https://hips.hearstapps.com/hmg-prod/images/25my-634-media-preview-1-6645f34b9fe58.jpeg?crop=0.787xw:0.663xh;0.0369xw,0.219xh&resize=1200:*', seats: 2},
+    {model: 'Aston Martin DB11', type: 'Coupe', category: 'Luxury', image: 'https://hips.hearstapps.com/hmg-prod/images/2020-aston-martin-db11-amr-106-1589946284.jpg?crop=0.840xw:0.709xh;0.0865xw,0.214xh&resize=1200:*', seats: 2},
+    {model: 'McLaren 720S', type: 'Coupe', category: 'Exotic', image: 'https://hips.hearstapps.com/hmg-prod/images/2019-mclaren-720s-spider-508-1565493374.jpg?crop=0.629xw:0.577xh;0.303xw,0.402xh&resize=1200:*', seats: 2},
+    {model: 'Range Rover', type: 'SUV', category: 'Luxury', image: 'https://hips.hearstapps.com/hmg-prod/images/2022-range-rover-se-lwb-470-1665593876.jpg?crop=0.735xw:0.620xh;0.205xw,0.363xh&resize=1200:*', seats: 5},
+    {model: 'Genesis G80', type: 'Sedan', category: 'Luxury', image: 'https://hips.hearstapps.com/hmg-prod/images/2024-volvo-xc90-101-649311ffdc60b.jpg?crop=0.536xw:0.401xh;0.292xw,0.382xh&resize=1200:*', seats: 5},
+    {model: 'Volvo XC90', type: 'SUV', category: 'Luxury', image: 'https://hips.hearstapps.com/hmg-prod/images/2024-volvo-xc90-101-649311ffdc60b.jpg?crop=0.536xw:0.401xh;0.292xw,0.382xh&resize=1200:*', seats: 7},
+    {model: 'Mazda CX-5', type: 'SUV', category: 'Compact', image: 'https://hips.hearstapps.com/hmg-prod/images/2022-mazda-cx-5-2p5-turbo-signature-123-1657559083.jpg?crop=0.805xw:0.680xh;0.0977xw,0.252xh&resize=1200:*', seats: 5},
+    {model: 'Tesla Model X', type: 'SUV', category: 'Electric', image: 'https://hips.hearstapps.com/hmg-prod/images/2024-tesla-model-s-107-6572200e43fa1.jpg?crop=0.586xw:0.496xh;0.204xw,0.271xh&resize=1200:*', seats: 7},
+    {model: 'Jaguar XJ', type: 'Sedan', category: 'Luxury', image: 'https://hips.hearstapps.com/hmg-prod/images/2016-jaguar-xjl-portfolio-1-1557860785.jpg?crop=1.00xw:0.924xh;0,0.0759xh&resize=1200:*', seats: 5},
+    {model: 'Chrysler 300', type: 'Sedan', category: 'Standard', image: 'https://hips.hearstapps.com/hmg-prod/images/2023-chrysler-300c-platinum-367-6494817562ef9.jpg?crop=0.623xw:0.525xh;0.216xw,0.434xh&resize=1200:*', seats: 5},
+    {model: 'Lincoln MKT Limousine', type: 'Limousine', category: 'Luxury', image: 'https://pr-limos.de/wp-content/uploads/2022/01/20.jpg', seats: 8},
+    {model: 'Cadillac XTS Limousine', type: 'Limousine', category: 'Luxury', image: 'https://pr-limos.de/wp-content/uploads/2022/01/20.jpg', seats: 8},
+    {model: 'Chrysler 300 Limousine', type: 'Limousine', category: 'Luxury', image: 'https://pr-limos.de/wp-content/uploads/2022/01/20.jpg', seats: 8},
+    {model: 'Mercedes-Benz S-Class Limousine', type: 'Limousine', category: 'Luxury', image: 'https://pr-limos.de/wp-content/uploads/2022/01/20.jpg', seats: 8},
+    {model: 'Hummer H2 Limousine', type: 'Limousine', category: 'Exotic', image: 'https://pr-limos.de/wp-content/uploads/2022/01/20.jpg', seats: 8},
+    {model: 'Rolls-Royce Phantom Limousine', type: 'Limousine', category: 'Luxury', image: 'https://images.squarespace-cdn.com/content/v1/59a18fe46b8f5be647f23512/1632086698422-H41DO2XM0XSREYSFAUN3/vip-limo-service-rolls-royce-phantom-300-exterior-01-1500.jpg', seats: 8},
+    {model: 'Lincoln Navigator Limousine', type: 'Limousine', category: 'Luxury', image: 'https://www.bajalimo.net/wp-content/uploads/2016/03/Ford-Excursion-Stretch-Limo-Black.jpg', seats: 8},
+    {model: 'Ford Excursion Limousine', type: 'Limousine', category: 'Luxury', image: 'https://www.bajalimo.net/wp-content/uploads/2016/03/Ford-Excursion-Stretch-Limo-Black.jpg', seats: 8}
+  
+  ];
+  
+  const servicePoints = [
+    {name: 'Berlin', image: 'https://i.ibb.co/zF1YZTC/DALL-E-2024-05-28-19-52-11-A-simple-and-modern-logo-representing-a-car-rental-service-point-The-logo.webp'},
+    {name: 'Hamburg', image: 'https://i.ibb.co/zF1YZTC/DALL-E-2024-05-28-19-52-11-A-simple-and-modern-logo-representing-a-car-rental-service-point-The-logo.webp'},
+    {name: 'Munich', image: 'https://i.ibb.co/zF1YZTC/DALL-E-2024-05-28-19-52-11-A-simple-and-modern-logo-representing-a-car-rental-service-point-The-logo.webp'},
+    {name: 'Cologne', image: 'https://i.ibb.co/zF1YZTC/DALL-E-2024-05-28-19-52-11-A-simple-and-modern-logo-representing-a-car-rental-service-point-The-logo.webp'},
+    {name: 'Frankfurt', image: 'https://i.ibb.co/zF1YZTC/DALL-E-2024-05-28-19-52-11-A-simple-and-modern-logo-representing-a-car-rental-service-point-The-logo.webp'},
+    {name: 'Essen', image: 'https://i.ibb.co/zF1YZTC/DALL-E-2024-05-28-19-52-11-A-simple-and-modern-logo-representing-a-car-rental-service-point-The-logo.webp'},
+    {name: 'Stuttgart', image: 'https://i.ibb.co/zF1YZTC/DALL-E-2024-05-28-19-52-11-A-simple-and-modern-logo-representing-a-car-rental-service-point-The-logo.webp'},
+    {name: 'Düsseldorf', image: 'https://i.ibb.co/zF1YZTC/DALL-E-2024-05-28-19-52-11-A-simple-and-modern-logo-representing-a-car-rental-service-point-The-logo.webp'},
+    {name: 'Leipzig', image: 'https://i.ibb.co/zF1YZTC/DALL-E-2024-05-28-19-52-11-A-simple-and-modern-logo-representing-a-car-rental-service-point-The-logo.webp'},
+    {name: 'Dortmund', image: 'https://i.ibb.co/zF1YZTC/DALL-E-2024-05-28-19-52-11-A-simple-and-modern-logo-representing-a-car-rental-service-point-The-logo.webp'},
+    {name: 'Bremen', image: 'https://i.ibb.co/zF1YZTC/DALL-E-2024-05-28-19-52-11-A-simple-and-modern-logo-representing-a-car-rental-service-point-The-logo.webp'},
+    {name: 'Dresden', image: 'https://i.ibb.co/zF1YZTC/DALL-E-2024-05-28-19-52-11-A-simple-and-modern-logo-representing-a-car-rental-service-point-The-logo.webp'},
+    {name: 'Hanover', image: 'https://i.ibb.co/zF1YZTC/DALL-E-2024-05-28-19-52-11-A-simple-and-modern-logo-representing-a-car-rental-service-point-The-logo.webp'},
+    {name: 'Nuremberg', image: 'https://i.ibb.co/zF1YZTC/DALL-E-2024-05-28-19-52-11-A-simple-and-modern-logo-representing-a-car-rental-service-point-The-logo.webp'},
+    {name: 'Duisburg', image: 'https://i.ibb.co/zF1YZTC/DALL-E-2024-05-28-19-52-11-A-simple-and-modern-logo-representing-a-car-rental-service-point-The-logo.webp'},
+    {name: 'Bochum', image: 'https://i.ibb.co/zF1YZTC/DALL-E-2024-05-28-19-52-11-A-simple-and-modern-logo-representing-a-car-rental-service-point-The-logo.webp'},
+    {name: 'Wuppertal', image: 'https://i.ibb.co/zF1YZTC/DALL-E-2024-05-28-19-52-11-A-simple-and-modern-logo-representing-a-car-rental-service-point-The-logo.webp'},
+    {name: 'Bielefeld', image: 'https://i.ibb.co/zF1YZTC/DALL-E-2024-05-28-19-52-11-A-simple-and-modern-logo-representing-a-car-rental-service-point-The-logo.webp'},
+    {name: 'Bonn', image: 'https://i.ibb.co/zF1YZTC/DALL-E-2024-05-28-19-52-11-A-simple-and-modern-logo-representing-a-car-rental-service-point-The-logo.webp'},
+    {name: 'Münster', image: 'https://i.ibb.co/zF1YZTC/DALL-E-2024-05-28-19-52-11-A-simple-and-modern-logo-representing-a-car-rental-service-point-The-logo.webp'},
+    {name: 'Karlsruhe', image: 'https://i.ibb.co/zF1YZTC/DALL-E-2024-05-28-19-52-11-A-simple-and-modern-logo-representing-a-car-rental-service-point-The-logo.webp'},
+    {name: 'Mannheim', image: 'https://i.ibb.co/zF1YZTC/DALL-E-2024-05-28-19-52-11-A-simple-and-modern-logo-representing-a-car-rental-service-point-The-logo.webp'},
+    {name: 'Augsburg', image: 'https://i.ibb.co/zF1YZTC/DALL-E-2024-05-28-19-52-11-A-simple-and-modern-logo-representing-a-car-rental-service-point-The-logo.webp'},
+    {name: 'Wiesbaden', image: 'https://i.ibb.co/zF1YZTC/DALL-E-2024-05-28-19-52-11-A-simple-and-modern-logo-representing-a-car-rental-service-point-The-logo.webp'},
+    {name: 'Gelsenkirchen', image: 'https://i.ibb.co/zF1YZTC/DALL-E-2024-05-28-19-52-11-A-simple-and-modern-logo-representing-a-car-rental-service-point-The-logo.webp'},
+    {name: 'Mönchengladbach', image: 'https://i.ibb.co/zF1YZTC/DALL-E-2024-05-28-19-52-11-A-simple-and-modern-logo-representing-a-car-rental-service-point-The-logo.webp'},
+    {name: 'Braunschweig', image: 'https://i.ibb.co/zF1YZTC/DALL-E-2024-05-28-19-52-11-A-simple-and-modern-logo-representing-a-car-rental-service-point-The-logo.webp'},
+    {name: 'Chemnitz', image: 'https://i.ibb.co/zF1YZTC/DALL-E-2024-05-28-19-52-11-A-simple-and-modern-logo-representing-a-car-rental-service-point-The-logo.webp'},
+    {name: 'Kiel', image: 'https://i.ibb.co/zF1YZTC/DALL-E-2024-05-28-19-52-11-A-simple-and-modern-logo-representing-a-car-rental-service-point-The-logo.webp'},
+    {name: 'Aachen', image: 'https://i.ibb.co/zF1YZTC/DALL-E-2024-05-28-19-52-11-A-simple-and-modern-logo-representing-a-car-rental-service-point-The-logo.webp'},
+    {name: 'Halle', image: 'https://i.ibb.co/zF1YZTC/DALL-E-2024-05-28-19-52-11-A-simple-and-modern-logo-representing-a-car-rental-service-point-The-logo.webp'},
+    {name: 'Magdeburg', image: 'https://i.ibb.co/zF1YZTC/DALL-E-2024-05-28-19-52-11-A-simple-and-modern-logo-representing-a-car-rental-service-point-The-logo.webp'},
+    {name: 'Freiburg', image: 'https://i.ibb.co/zF1YZTC/DALL-E-2024-05-28-19-52-11-A-simple-and-modern-logo-representing-a-car-rental-service-point-The-logo.webp'},
+    {name: 'Krefeld', image: 'https://i.ibb.co/zF1YZTC/DALL-E-2024-05-28-19-52-11-A-simple-and-modern-logo-representing-a-car-rental-service-point-The-logo.webp'},
+    {name: 'Lübeck', image: 'https://i.ibb.co/zF1YZTC/DALL-E-2024-05-28-19-52-11-A-simple-and-modern-logo-representing-a-car-rental-service-point-The-logo.webp'}
+  ];
+  
+
+db.carModels.insertMany(carModels);
+db.servicePoints.insertMany(servicePoints);
+
+// Step 2: Generate cars with random variations and unique plate numbers
+const priceRanges = {
+  Economy: [30, 50],
+  Standard: [50, 80],
+  Premium: [80, 120],
+  Luxury: [120, 200],
+  Compact: [40, 60],
+  Electric: [100, 150],
+  Performance: [150, 300],
+  Exotic: [200, 400],
+  "Mid-size": [70, 100],
+  "Compact Luxury": [80, 120]
+};
+
+const colors = ['Red', 'Blue', 'Black', 'White', 'Silver'];
+
+function generateRandomPlate() {
+  const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  const digits = '0123456789';
+  return Array.from({ length: 3 }, () => letters[Math.floor(Math.random() * letters.length)]).join('') + '-' +
+         Array.from({ length: 4 }, () => digits[Math.floor(Math.random() * digits.length)]).join('');
+}
+
+function generateRandomDate(start, end) {
+  return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
+}
+
+const now = new Date();
+const oneYearLater = new Date();
+oneYearLater.setFullYear(now.getFullYear() + 1);
+
+const cars = [];
+const bookings = [];
+
+console.log(`Number of car models: ${carModels.length}`);
+
+for (let i = 0; i < 3600; i++) {
+  if (carModels.length === 0) {
+    throw new Error("No car models available.");
+  }
+
+  const model = carModels[i % carModels.length];
+  if (!model) {
+    console.error(`No model found for index ${i % carModels.length}`);
+    continue;
+  }
+
+  const category = model.category;
+  if (!priceRanges[category]) {
+    console.error(`No price range found for category ${category}`);
+    continue;
+  }
+
+  const basePriceRange = priceRanges[category];
+  const basePrice = basePriceRange[0] + Math.floor(Math.random() * (basePriceRange[1] - basePriceRange[0]));
+  const color = colors[Math.floor(Math.random() * colors.length)];
+  const plateNo = generateRandomPlate();
+  const booking = (Math.random() < 0.3) ? { // 30% chance the car has a booking
+    startDate: generateRandomDate(now, oneYearLater),
+    endDate: null,
+    customer: {
+      name: `Customer ${i}`,
+      email: `customer${i}@example.com`
+    },
+    price: null, // placeholder for price
+    servicePointId: null, // placeholder for service point ID
+    type: 'rental'
+  } : null;
+
+  if (booking) {
+    // Ensure the booking duration is no more than 25 days
+    const maxDays = 25;
+    const startDate = booking.startDate;
+    const endDate = new Date(startDate.getTime() + Math.floor(Math.random() * maxDays + 1) * 24 * 60 * 60 * 1000); // Random end date within 25 days
+    booking.endDate = endDate;
+    const numberOfDays = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24));
+    booking.price = parseFloat((basePrice * numberOfDays * 1.1).toFixed(2)); // basePrice * numberOfDays + 10%, rounded to 2 decimal points
+    bookings.push({
+      carId: null, // placeholder for carId
+      startDate: booking.startDate,
+      endDate: booking.endDate,
+      customer: booking.customer,
+      price: booking.price,
+      servicePointId: null, // placeholder for service point ID
+      type: 'rental'
+    });
+  }
+
+  cars.push({
+    model: model.model,
+    type: model.type,
+    category: model.category,
+    basePrice,
+    color,
+    plateNo,
+    servicePointId: null,
+    image: model.image,
+    seats: model.seats // Add the number of seats here
+  });
+}
+
+db.cars.insertMany(cars);
+
+// Step 3: Assign cars to service points ensuring each service point gets at least 50 cars and at most 150 cars
+const servicePointIds = db.servicePoints.find().map(sp => sp._id).toArray();
+let unassignedCars = db.cars.find({ servicePointId: null }).toArray();
+
+console.log(`Number of service points: ${servicePointIds.length}`);
+console.log(`Number of unassigned cars: ${unassignedCars.length}`);
+
+servicePointIds.forEach(spId => {
+  let numCarsToAssign = Math.floor(Math.random() * (150 - 50 + 1)) + 50;
+  if (unassignedCars.length < numCarsToAssign) {
+    numCarsToAssign = unassignedCars.length;
+  }
+
+  const carsToAssign = unassignedCars.splice(0, numCarsToAssign);
+
+  db.servicePoints.updateOne(
+    { _id: spId },
+    { $addToSet: { cars: { $each: carsToAssign.map(car => car._id) } } }
+  );
+
+  carsToAssign.forEach(car => {
+    db.cars.updateOne(
+      { _id: car._id },
+      { $set: { servicePointId: spId } }
+    );
+  });
+});
+
+// Assign remaining cars
+while (unassignedCars.length > 0) {
+  servicePointIds.forEach(spId => {
+    if (unassignedCars.length === 0) return;
+
+    const car = unassignedCars.pop();
+    db.servicePoints.updateOne(
+      { _id: spId },
+      { $addToSet: { cars: car._id } }
+    );
+    db.cars.updateOne(
+      { _id: car._id },
+      { $set: { servicePointId: spId } }
+    );
+  });
+};
+
+// Step 4: Update bookings with car IDs and service point IDs, then insert into bookings collection
+db.cars.find().forEach(car => {
+  const carBookings = bookings.filter(b => b.carId === null && b.startDate < b.endDate); // Ensure startDate is before endDate
+  carBookings.forEach(booking => {
+    booking.carId = car._id;
+    booking.servicePointId = car.servicePointId; // Assign the service point ID
+    db.bookings.insertOne(booking);
+  });
+});
